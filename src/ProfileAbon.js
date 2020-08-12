@@ -18,21 +18,22 @@ class ProfileAbon extends Component {
                                     flexDirection:'column',
                                     marginVertical:30,
                                     marginHorizontal:30,
+                                    padding:15,
                                     alignItems:'center',
-                                    marginTop:100, borderWidth: 1, borderColor: '#d0d0d0',                    
+                                    marginTop:80, borderWidth: 1, borderColor: '#d0d0d0',                    
                                     borderRadius:10,
                                     backgroundColor:'#fff'                    
                             }}>
                                         
                         <Text style={{ fontWeight:'bold', textAlign:"center", paddingVertical:5, paddingHorizontal:5,fontSize:22}}>Zahra Maulidna, S.Pd</Text>
-                        <Text style={{ textAlign:"center", padding:5, fontSize:12}}>zahra_maulidna</Text>
+                        <Text style={{ textAlign:"center", fontSize:12}}>zahra_maulidna</Text>
                         <Text style={{ textAlign:"center", fontSize:12}}>Tenaga IT</Text>
                     
-                        <View style={{ flexDirection:'row',width:90,height:40, borderColor:'grey', color:'black', marginBottom:60,
+                        <View style={{ flexDirection:'row',width:90,height:40, borderColor:'grey', color:'black', marginBottom:40,
                                         paddingHorizontal:10, paddingVertical:10,marginTop:10,justifyContent:'center',
                                         borderWidth:1, borderColor: '#FF565E',borderRadius:5, }}>
                             <Icon name={'book'} size={15} style={{color:'#FF565E', textAlign:'center', padding:3}} />         
-                            <Text style={{color: '#FF565E', fontWeight:'bold', paddingHorizontal:2, paddingVertical:2,fontSize:14}}>Panduan</Text>
+                            <Text style={{color: '#FF565E', fontWeight:'bold', paddingHorizontal:3, paddingVertical:3,fontSize:14}}>Panduan</Text>
                         </View> 
                                                 
                     </View>

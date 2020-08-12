@@ -9,52 +9,87 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import RNPickerSelect from 'react-native-picker-select';
 
 class AjukanIzin extends Component {
-    constructor(props){
+    constructor(props) {
         super(props);
-        this.state= {text:''};
+        this.inputRefs = {};
+        this.state = {
+            favColor: undefined,
+            items2: [
+                {
+                    label: 'Hadir Terlambat',
+                    value: 'Hadir Terlambat',
+                },
+                {
+                    label: 'Pulang lebih cepat',
+                    value: 'Pulang lebih cepat',
+                },
+                {
+                    label: 'Cuti',
+                    value: 'Cuti',
+                },
+                {
+                    label: 'Sakit',
+                    value: 'Sakit',
+                },
+                {
+                    label: 'Izin',
+                    value: 'Izin',
+                },
+                {
+                    label: 'Dinas Luar',
+                    value: 'Dinas Luar',
+                },
+                {
+                    label: 'Tugas Pendidikan (Diklat, Workshop, dll',
+                    value: 'Tugas Pendidikan (Diklat, Workshop, dll',
+                },
+            ],
+        };
     }
+   
     render(){       
         return(
             <View style={styles.container}>
+              
              <Text style={{fontSize:18,marginLeft:10, marginTop:20}}>Jenis</Text>
-                <View style={{ flexDirection:'row', borderColor:'grey',height:40, marginVertical:10, marginHorizontal:10, color:'black', 
-                                        marginBottom:30,paddingHorizontal:10, paddingVertical:10,marginTop:10,
-                                        justifyContent:'space-between',
-                                        borderWidth:1, borderColor: '#404040',borderRadius:5}}>
-                           
-                    <RNPickerSelect 
-                            onValueChange={(value) => console.log(value)}
-                            items={[
-                                { label: 'Hadir Terlambat', value: 'baseball' },
-                                { label: 'Pulang lebih cepat', value: 'hockey' },
-                                { label: 'Cuti', value: 'hockey' },
-                                { label: 'Sakit', value: 'hockey' },
-                                { label: 'Izin', value: 'hockey' },
-                                { label: 'Dinas Luar', value: 'hockey' },
-                                { label: 'Tugas Pendidikan (Diklat, Workshop, dll', value: 'hockey' },]}/>
-                         <Icon name={'caretdown'} size={15} style={{color:'#404040', textAlign:'center'}} />  
-                    </View> 
-                    
-                <Text style={{fontSize:18,marginLeft:10}}>Perihal</Text>
-                <View style={{ flexDirection:'column', borderColor:'grey', marginVertical:10, height:50,marginHorizontal:10, 
-                                color:'black', marginBottom:30,paddingHorizontal:10, paddingVertical:10,marginTop:10,
-                                justifyContent:'space-around',borderWidth:1, borderColor: '#404040',borderRadius:5}}>
-                    <TextInput style={{height:40, backgroundColor:'#fff', fontSize:18}}
-                                placeholder="Perihal" onChangeText={(text) => this.setState({text})}/>                    
-                </View>
+                <RNPickerSelect
+                    placeholder={{
+                        label: 'Pilih Jenis Izin',
+                        value: null,
+                    }}
+                    items={this.state.items2}
+                    onValueChange={(value) => {
+                        this.setState({
+                            favSport: value,
+                        });
+                    }}
+                    onUpArrow={() => {
+                        this.inputRefs.picker.togglePicker();
+                    }}
+                    onDownArrow={() => {
+                        this.inputRefs.company.focus();
+                    }}
+                    style={{ ...pickerSelectStyles }}
+                    value={this.state.favSport}
+                    ref={(el) => {
+                        this.inputRefs.picker2 = el;
+                    }}
+                />
 
+                <Text style={{fontSize:18,marginLeft:10, marginTop:20}}>Perihal</Text>            
+                <TextInput  style={pickerSelectStyles.inputIOS}
+                            placeholder="Masukan Perihal" onChangeText={(text) => this.setState({text})}/>  
+              
                 <TouchableOpacity onPress={() => {this.props.navigation.push('KirimIzin')}}  style={{
                         flexDirection:'column',
                         alignItems:'center',
-                        justifyContent:'center', marginTop:20}}>
+                        justifyContent:'space-between',marginTop:20}}>
                     <View style={{
                         paddingVertical:10,
                         paddingHorizontal:10,
-                        height: 50,
                         borderWidth: 1,
                         borderColor:'#00AEEF',
                         backgroundColor:'#00AEEF',
-                        justifyContent:'center',
                         borderRadius: 10}}>                        
                         <Text style={{textAlign:'center',fontSize:15, color:'white', fontWeight:"bold"}}>Ajukan Izin</Text>
                     </View>        
@@ -71,4 +106,20 @@ const styles= StyleSheet.create({
         paddingVertical:15,
         backgroundColor:'white'
     },   
+    
+});
+const pickerSelectStyles = StyleSheet.create({
+    inputIOS: {
+        fontSize: 16,
+        paddingTop: 13,
+        paddingHorizontal: 10,
+        paddingBottom: 12,
+        borderWidth: 1,
+        marginLeft:10,
+        marginTop:5,
+        borderColor: 'gray',
+        borderRadius: 4,
+        backgroundColor: 'white',
+        color: 'black',
+    },
 });

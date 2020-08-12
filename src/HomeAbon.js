@@ -11,13 +11,23 @@ class HomeAbon extends Component {
     constructor() {
         super();
     
-        this.state = { currentTime: null, currentDay: null, greetingMessage:null }
+        this.state = { currentTime: null, currentDay: null, greetingMessage:null,currentMonth: null }
         this.daysArray = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+        this.monthArray = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus','September','Oktober','November','Desember'];
+      }
+      componentDidMount() {
+        this.timer = setInterval(() => {
+          this.getCurrentTime();
+        }, 1000);
+      }
+       
+      componentWillUnmount() {
+        clearInterval(this.timer);
       }
     
-      componentWillMount() {
-        this.getCurrentTime();
-      }
+      // componentWillMount() {
+      //   this.getCurrentTime();
+      // }
    
       getCurrentTime = () => {
         let hour = new Date().getHours();
@@ -34,7 +44,6 @@ class HomeAbon extends Component {
         if (seconds < 10) {
           seconds = '0' + seconds;
         }
-
   
         const greetingMessage =
               hour >= 4 && hour < 11 ? 
@@ -49,24 +58,19 @@ class HomeAbon extends Component {
               this.setState({greetingMessage});
         
         this.setState({ currentTime: hour + ':' + minutes + ':' + seconds + ' ' });
-    
+
+        this.monthArray.map((item, keys) => {
+          if (keys == new Date().getMonth()) {
+            this.setState({ currentMonth: item  });
+          }
+        })
+        
         this.daysArray.map((item, key) => {
           if (key == new Date().getDay()) {
-            this.setState({ currentDay: item +', ' + date + ' ' +  'Agustus ' + year });
+            this.setState({ currentDay: item +', ' + date + ' ' +  this.state.currentMonth + ' ' + year });
           }
         })
       }
-    
-      componentWillUnmount() {
-        clearInterval(this.timer);
-      }
-    
-      componentDidMount() {
-        this.timer = setInterval(() => {
-          this.getCurrentTime();
-        }, 1000);
-      }
-      
     render(){
         return(
           
@@ -174,17 +178,16 @@ class HomeAbon extends Component {
 export default HomeAbon;
 const styles= StyleSheet.create({
     container: {
-        flex: 1,
-        paddingTop: (Platform.OS === 'ios') ? 20 : 0,
-      
-      },
-     
-      timeText: {
-        fontWeight:'bold',textAlign:"center",alignItems: 'center',fontSize:39,
-        color: '#74C6F4'
-      },
-      daysText: {
-        color: '#000',
-        fontSize: 21,textAlign:"center",alignItems: 'center'
-      }
+      flex: 1,
+      paddingTop: (Platform.OS === 'ios') ? 20 : 0,
+    },
+    
+    timeText: {
+      fontWeight:'bold',textAlign:"center",alignItems: 'center',fontSize:39,
+      color: '#74C6F4'
+    },
+    daysText: {
+      color: '#000',
+      fontSize: 21,textAlign:"center",alignItems: 'center'
+    }
 });

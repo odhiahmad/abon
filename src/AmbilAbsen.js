@@ -21,26 +21,25 @@ class AmbilAbsen extends Component {
                     backgroundColor:'#00AEEF',
                     borderRadius: 7}} >
                     <Text style={{fontSize:25, color:'white', marginTop:6,fontWeight:"bold"}}>Absen di Kantor</Text>
-                    <Text style={{fontSize:16, color:'white', marginTop:5}}>(Pastikan anda berada di dalam lingkungan kantor)</Text>
-                    <Text style={{fontSize:16, color:'white', textAlign:'center', margin:5, marginTop:5}}>Anda berada di radius area kantor : 15,08m dari titik tengah</Text>
-                    <Text style={{fontSize:16, color:'white', textAlign:'center',marginTop:5}}>Silahkan Ambil Absen</Text>
+                    <Text style={{fontSize:14, color:'white', marginTop:5}}>(Pastikan anda berada di dalam lingkungan kantor)</Text>
+                    <Text style={{fontSize:14, color:'white', textAlign:'center', margin:5, marginTop:5}}>Anda berada di radius area kantor : 15,08m dari titik tengah</Text>
+                    <Text style={{fontSize:14, color:'white', textAlign:'center',marginTop:5}}>Silahkan Ambil Absen</Text>
                     <TouchableOpacity onPress={() => {this.props.navigation.push('dalamkantor')}}  style={{
                                 flexDirection:'column'
                     }}>
                     <View style={{
                             flexDirection:'row',
-                            paddingVertical:10,
-                            paddingHorizontal:10,
+                            paddingVertical:8,
+                            paddingHorizontal:8,
                             borderWidth: 1,
                             marginTop:5,
-                            marginBottom:10,
                             alignItems:'center',
                             justifyContent: 'space-between',
                             borderColor:'white',
                             justifyContent:'center',
                             borderRadius: 3
                         }} >
-                         <Icon name={'check-square-o'} size={18} style={{ color:'#fff', padding:5}} />
+                         <Icon name={'check-square-o'} size={18} style={{ color:'#fff', padding:2}} />
                         <Text style={{fontSize:15, color:'white'}}>Ambil Absen</Text>
                     </View>    
                     </TouchableOpacity>
@@ -55,18 +54,18 @@ class AmbilAbsen extends Component {
                     backgroundColor:'#FF565E',
                     borderRadius: 7}} >
                     <Text style={{fontSize:25, color:'white', marginTop:10,fontWeight:"bold"}}>Absen di Luar Kantor</Text>
-                    <Text style={{fontSize:14, marginBottom:10, color:'white', marginTop:5}}>(Absen di luar kantor dengan mengupload bukti foto selfie atau dokumen pendukung)</Text>
+                    <Text style={{fontSize:14,  color:'white', marginTop:5}}>(Absen di luar kantor dengan mengupload bukti foto selfie atau dokumen pendukung)</Text>
                     <TouchableOpacity onPress={() => {this.props.navigation.push('luarkantor')}}  style={{
                                 flexDirection:'column',
                                
                     }}>
                         <View style={{
                                 flexDirection:'row',
-                                paddingVertical:10,
-                                paddingHorizontal:10,
+                                paddingVertical:8,
+                                paddingHorizontal:8,
                                 borderWidth: 1,
-                                marginTop:15,
-                                marginBottom:10,
+                                marginTop:8,
+                                marginBottom:8,
                                 alignItems:'center',
                                 justifyContent: 'space-between',
                                 borderColor:'white',
@@ -76,8 +75,7 @@ class AmbilAbsen extends Component {
                             <Text style={{fontSize:15, color:'white'}}>Ambil Absen</Text>
                         </View>   
                     </TouchableOpacity> 
-                </View>          
-            
+                </View>                  
             </View>
         );
     }

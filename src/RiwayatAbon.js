@@ -23,10 +23,10 @@ class RiwayatAbon extends Component {
                         }}>
                         <View style={{
                             width: 20,
-                            height: 20,
+                            height: 20,                           
                             justifyContent:'center'
                         }} >
-                        <Icon name={'calendar-o'} size={22} style={{color:'#00AEEF', textAlign:'center'}} />
+                        <Icon name={'calendar-o'} size={20} style={{color:'#00AEEF', textAlign:'center'}} />
                         
                         </View>                
                     </TouchableOpacity>                   
