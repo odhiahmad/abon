@@ -52,6 +52,10 @@ class AjukanIzin extends Component {
             <View style={styles.container}>
               
              <Text style={{fontSize:18,marginLeft:10, marginTop:20}}>Jenis</Text>
+             <View style={{
+                        paddingVertical:5,
+                        justifyContent:'space-between',
+                        paddingHorizontal:5}}>          
                 <RNPickerSelect
                     placeholder={{
                         label: 'Pilih Jenis Izin',
@@ -69,13 +73,13 @@ class AjukanIzin extends Component {
                     onDownArrow={() => {
                         this.inputRefs.company.focus();
                     }}
-                    style={{ ...pickerSelectStyles }}
+                  
                     value={this.state.favSport}
                     ref={(el) => {
                         this.inputRefs.picker2 = el;
                     }}
                 />
-
+                </View>
                 <Text style={{fontSize:18,marginLeft:10, marginTop:20}}>Perihal</Text>            
                 <TextInput  style={pickerSelectStyles.inputIOS}
                             placeholder="Masukan Perihal" onChangeText={(text) => this.setState({text})}/>  
@@ -110,13 +114,13 @@ const styles= StyleSheet.create({
 });
 const pickerSelectStyles = StyleSheet.create({
     inputIOS: {
-        fontSize: 16,
-        paddingTop: 13,
-        paddingHorizontal: 10,
-        paddingBottom: 12,
+        fontSize: 14,
+        marginLeft:10, 
+        padding:14,       
         borderWidth: 1,
-        marginLeft:10,
         marginTop:5,
+        marginRight:10,
+        justifyContent:'space-between',
         borderColor: 'gray',
         borderRadius: 4,
         backgroundColor: 'white',

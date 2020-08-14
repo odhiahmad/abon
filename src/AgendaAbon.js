@@ -48,7 +48,7 @@ class AgendaAbon extends Component {
                             borderRadius:5, justifyContent: 'space-between'}}>
                 
                   <Text style={{color: '#000', fontWeight:'bold',fontSize:22}}>Agenda</Text>
-                  <TouchableOpacity onPress={() => {this.props.navigation.push('Agenda')}}  style={{
+                  <TouchableOpacity onPress={() => {this.props.navigation.push('RiwayatIzin')}}  style={{
                           flexDirection:'column',
                           alignItems:'center',
                           justifyContent:'center'
@@ -120,10 +120,10 @@ class AgendaAbon extends Component {
                           </View>
                 
                       </TouchableOpacity>
-                        {/* <View style={{padding:6}}>
+                        <View style={{padding:6}}>
                             <Text style={{padding:6}}>Start: {startDate}</Text>
                             <Text style={{padding:6}}>End : {endDate}</Text>
-                        </View> */}
+                        </View>
                
             </View>
             

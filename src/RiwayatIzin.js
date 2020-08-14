@@ -8,7 +8,7 @@ import {
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-class RiwayatAbon extends Component {
+class RiwayatIzin extends Component {
     
     state = {
         isDateTimePickerVisible: false,
@@ -30,11 +30,31 @@ class RiwayatAbon extends Component {
                              justifyContent: 'space-between' }}>
                 
                     <Text style={{color: '#000', fontWeight:'bold',fontSize:22}}>Riwayat Absen</Text>
-                  
-                    <TouchableOpacity onPress={this._showDateTimePicker}  style={{
+                    <View style={{flexDirection:'row', marginTop:10,marginVertical:5,marginHorizontal:5,
+                            borderColor:'grey', color:'black', 
+                             justifyContent: 'space-between' }}>
+                
+                        <TouchableOpacity onPress={this._showDateTimePicker}  style={{
+                                flexDirection:'column',
+                                alignItems:'center',
+                                marginRight:20,
+                                justifyContent:'center'
+                            }}>
+                            <View style={{
+                                width: 25,
+                                height: 25,      
+                                borderWidth:1,  borderColor:'#00AEEF',
+                                backgroundColor:'white',
+                                borderRadius: 2,                  
+                                justifyContent:'center'
+                            }} >
+                             <Text style={{color: '#00AEEF',marginHorizontal:2,marginVertical:1, fontWeight:'bold',fontSize:14}}>All</Text>
+                            
+                            </View>                
+                        </TouchableOpacity>  
+                        <TouchableOpacity onPress={this._showDateTimePicker}  style={{
                             flexDirection:'column',
-                            alignItems:'center',
-                            justifyContent:'center'
+                           
                         }}>
                         <View style={{
                             width: 20,
@@ -45,13 +65,12 @@ class RiwayatAbon extends Component {
                         
                         </View>                
                     </TouchableOpacity>  
-                    <DateTimePicker
-                        isVisible={this.state.isDateTimePickerVisible}
-                        onConfirm={this._handleDatePicked}
-                        onCancel={this._hideDateTimePicker}
-                
-                    />                 
-                </View>
+                        <DateTimePicker
+                            isVisible={this.state.isDateTimePickerVisible}
+                            onConfirm={this._handleDatePicked}
+                            onCancel={this._hideDateTimePicker}/> 
+                        </View>                
+                    </View>
                  <View style={{padding:6}}>
                             <Text style={{padding:6}}>Start:{this.state.isDateTimePickerVisible}</Text>
                         </View>
@@ -83,7 +102,7 @@ class RiwayatAbon extends Component {
         );
     }
 }
-export default RiwayatAbon;
+export default RiwayatIzin;
 const styles= StyleSheet.create({
     container: {
         flex: 1,

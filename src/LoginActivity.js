@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import {
-    View,Image,
+    View,Image,Alert,
     Text,TextInput, TouchableOpacity,
     StyleSheet,
 } from "react-native";

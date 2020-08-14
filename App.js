@@ -12,6 +12,7 @@ import Profile from './src/ProfileAbon'
 
 import AmbilAbsen from './src/AmbilAbsen'
 import AjukanIzin from './src/AjukanIzin'
+import RiwayatIzin from './src/RiwayatIzin'
 
 import Icon from 'react-native-vector-icons/Feather';
 import IconB from 'react-native-vector-icons/FontAwesome5';
@@ -46,14 +47,23 @@ const StackAgenda=()=>(
        headerShown:false,
      }}
    />  
-     <Stack.Screen name="AjukanIzin" component={AjukanIzin}
+    <Stack.Screen name="AjukanIzin" component={AjukanIzin}
        options={{ title :'Pengajuan Izin',
      headerStyle:{
        backgroundColor:'white'
      },
      headerShown:true,
      }}
-   />
+    />
+    <Stack.Screen name="RiwayatIzin" component={RiwayatIzin}
+       options={{ title :'Riwayat Izin',
+     headerStyle:{
+       backgroundColor:'white',
+      
+     },
+     headerShown:true,
+     }}
+    />
 </Stack.Navigator>
 )
 const StackRiwayat=()=>(
@@ -64,6 +74,7 @@ const StackRiwayat=()=>(
       headerShown:false,
      }}
    />  
+     
 </Stack.Navigator>
 )
 const StackProfile=()=>(
