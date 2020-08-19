@@ -1,12 +1,37 @@
 import React, { Component } from "react";
 import {
     View,
-    Text,
+    Text,Alert,
     StyleSheet, TouchableOpacity
 } from "react-native";
 
+import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/AntDesign';
+
 class ProfileAbon extends Component {
+    logout = () => {
+        Alert.alert(
+            'Logout',
+            'Are you sure? You want to logout?',
+            [
+              {
+                text: 'Cancel',
+                onPress: () => {
+                  return null;
+                },
+              },
+              {
+                text: 'Confirm',
+                onPress: () => {
+                  AsyncStorage.clear();
+                  props.navigation.navigate('Auth');
+                  console.log('logout');
+                },
+              },
+            ],
+            { cancelable: false }
+          );
+      };
     render(){
         return(
             <View style={styles.container}>
@@ -57,7 +82,8 @@ class ProfileAbon extends Component {
                         <Text style={{ textAlign:"center", fontSize:13,marginBottom:10}}>Pulang Cepat : 0</Text>                                         
                     </View>
                       {/* Logout */}
-                    <TouchableOpacity onPress={() => {this.props.navigation.push('Logout')}}  style={{
+                      
+                    <TouchableOpacity onPress={() => {this.logout}}  style={{
                                 flexDirection:'column',
                                 alignItems:'center', 
                                 justifyContent:'center'

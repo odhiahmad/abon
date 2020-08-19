@@ -1,29 +1,25 @@
-import React from 'react';
-import { View, Image,Text } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { ActivityIndicator,View, Image,Text } from 'react-native';
 
 import imagename from './logo.png' 
+import AsyncStorage from '@react-native-community/async-storage';
 
-class SplashScreen extends React.Component {
-  performTimeConsumingTask = async() => {
-    return new Promise((resolve) =>
-      setTimeout(
-        () => { resolve('result') },
-        5000
-      )
-    )
-  }
+const SplashScreen = props => {
+  //State for ActivityIndicator animation
+  let [animating, setAnimating] = useState(true);
 
-  async componentDidMount() {
-    // Preload data from an external API
-    // Preload data using AsyncStorage
-    const data = await this.performTimeConsumingTask();
+  useEffect(() => {
+    setTimeout(() => {
+      setAnimating(false);
+      AsyncStorage.getItem('pegawai').then(value =>
+        props.navigation.navigate(
+          value === null ? 'Auth' : 'Home'
+        )
+      );
+    }, 5000);
+  }, []);
 
-    if (data !== null) {
-      this.props.navigation.navigate('Login');
-    }
-  }
 
-  render() {
     return (
       <View style={styles.viewStyles}>
           <Image source={require('../assets/bg.png')} style={styles.backgroundImage}></Image>
@@ -32,10 +28,16 @@ class SplashScreen extends React.Component {
               <Image source={imagename}
                       style={{ width: 160, height: 160, alignItems:'center' }}/>   
           </View> 
+          <ActivityIndicator
+            animating={animating}
+            color='red'
+            size="large"
+            style={styles.activityIndicator}
+          />
           <Text style={ styles.text }>1.0</Text>
       </View>
     );
-  }
+  
 }
 
 const styles = {
@@ -57,6 +59,10 @@ const styles = {
   },
   text: {
     fontSize: 10,
+  },
+  activityIndicator: {
+    alignItems: 'center',
+    height: 80,
   }
 }
 

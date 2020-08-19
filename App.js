@@ -23,6 +23,7 @@ import SplashScreen from './src/SplashScreen';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
+
 //Home Screen
 const StackHome=()=>(
   <Stack.Navigator>
@@ -87,7 +88,13 @@ const StackProfile=()=>(
        options={{ 
        headerShown:false,
      }}/>  
-  
+      <Stack.Screen
+      name="logout"
+      component={logout}
+      options={{ 
+     headerShown:false,
+     }}
+    />
 </Stack.Navigator>
 )
 
@@ -98,8 +105,10 @@ export default function App() {
         <Stack.Screen name="SplashScreen" component={SplashScreen}
           options={{ 
           headerShown:false,
-          }}/>
-        <Stack.Screen name="Login" component={LoginActivity}
+          }
+          }/>
+          
+        <Stack.Screen name="Auth" component={Auth}
          options={{ 
          headerShown:false,
          }}/>
@@ -125,6 +134,26 @@ function HomeScreenStack({ navigation }) {
     />
   </Stack.Navigator>
   );
+}
+
+function Auth({  }) {
+  return (
+    <Stack.Navigator initialRouteName="LoginActivity">
+    <Stack.Screen
+      name="LoginActivity"
+      component={LoginActivity}
+      options={{ 
+     headerShown:false,
+     }}
+    />
+  </Stack.Navigator>
+  );
+}
+function logout({  }) {
+  _simpleAlertHandler = () => {
+    //function to make simple alert
+    Alert.alert('Hello I am Simple Alert');
+  };
 }
 function BottomTabStack() {
   return (
