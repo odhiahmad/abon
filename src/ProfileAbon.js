@@ -1,126 +1,160 @@
 import React, { Component } from "react";
 import {
     View,
-    Text,Alert,
+    Text,Alert,ScrollView,Button,
     StyleSheet, TouchableOpacity
 } from "react-native";
 
+import { LinearGradient } from 'expo-linear-gradient';
+import ProgressCircle from 'react-native-progress-circle'
 import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/AntDesign';
 
+export const onSignOut = () =>  AsyncStorage.clear();
+
 class ProfileAbon extends Component {
-    logout = () => {
-        Alert.alert(
-            'Logout',
-            'Are you sure? You want to logout?',
-            [
-              {
-                text: 'Cancel',
-                onPress: () => {
-                  return null;
-                },
-              },
-              {
-                text: 'Confirm',
-                onPress: () => {
-                  AsyncStorage.clear();
-                  props.navigation.navigate('Auth');
-                  console.log('logout');
-                },
-              },
-            ],
-            { cancelable: false }
-          );
-      };
+  constructor(props) {
+    super(props)
+    this.state={
+      nama_asn: 'User',
+      username: '0000000',
+      jabatan: 'Jabatan',
+      isError: false,
+      refreshing: false,
+      isLoading: true,
+      data: []
+    }
+    AsyncStorage.getItem('nama_asn', (error, result) => {
+      if (result) {
+          this.setState({
+            nama_asn: result
+          });
+      }
+    });
+    AsyncStorage.getItem('username', (error, result) => {
+      if (result) {
+          this.setState({
+            username: result
+          });
+      }
+    });
+    AsyncStorage.getItem('jabatan', (error, result) => {
+      if (result) {
+          this.setState({
+              jabatan: result
+          });
+      }
+    });
+  }
+  
     render(){
-        return(
+        return(         
             <View style={styles.container}>
-                <View style={{  height : '20%',width : '100%', borderBottomStartRadius : 70,
-                                backgroundColor : '#00AEEF',
-                                borderBottomEndRadius : 70}}>
-                          {/* Akun */}        
-                          <View style={{
-                                    flexDirection:'column',
-                                    marginVertical:30,
-                                    marginHorizontal:30,
-                                    padding:15,
-                                    alignItems:'center',
-                                    marginTop:80, borderWidth: 1, borderColor: '#d0d0d0',                    
-                                    borderRadius:10,
-                                    backgroundColor:'#fff'                    
-                            }}>
-                                        
-                        <Text style={{ fontWeight:'bold', textAlign:"center", paddingVertical:5, paddingHorizontal:5,fontSize:22}}>Zahra Maulidna, S.Pd</Text>
-                        <Text style={{ textAlign:"center", fontSize:12}}>zahra_maulidna</Text>
-                        <Text style={{ textAlign:"center", fontSize:12}}>Tenaga IT</Text>
-                    
-                        <View style={{ flexDirection:'row',width:90,height:40, borderColor:'grey', color:'black', marginBottom:40,
-                                        paddingHorizontal:10, paddingVertical:10,marginTop:10,justifyContent:'center',
-                                        borderWidth:1, borderColor: '#FF565E',borderRadius:5, }}>
-                            <Icon name={'book'} size={15} style={{color:'#FF565E', textAlign:'center', padding:3}} />         
-                            <Text style={{color: '#FF565E', fontWeight:'bold', paddingHorizontal:3, paddingVertical:3,fontSize:14}}>Panduan</Text>
-                        </View> 
-                                                
+             <ScrollView>
+            <LinearGradient
+                colors={['#00AEEF', '#00B9F2']} style={styles.headerBanner}>
+              </LinearGradient>
+              <View style={styles.wrapper}>
+                <View style={styles.boxHeader}>
+                  <View style={{alignItems:'center'}}>
+                  
+                  <Text style={{fontSize:20, fontWeight:'bold', marginBottom:3, color:'#2D3137'}}>{this.state.nama_asn}</Text>
+                    <Text style={{fontSize:20, fontWeight:'bold', marginBottom:3, color:'#2D3137'}}>{this.state.username}</Text>
+                    <Text style={{fontSize:12, fontWeight:'normal', marginBottom:3}}>{this.state.jabatan}</Text>
+                    <Text style={{fontSize:12, fontWeight:'200', marginBottom:5, fontStyle:'italic'}}></Text>
+                    <TouchableOpacity style={{borderWidth:1, borderColor:'#FF6063', padding:5,borderRadius:3,alignItems:'center',flexDirection:'row',justifyContent:'center'}}>
+                        <Icon name={'book'} size={15} style={{color:'#FF565E', textAlign:'center', padding:3}} />
+                        <Text style={{color: '#FF565E', fontWeight:'bold', paddingHorizontal:3, paddingVertical:3,fontSize:14}}>Panduan</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <View style={styles.boxProgress}>
+                    <Text style={{marginBottom:10, fontSize:18, fontWeight:'bold', color:'#2D3137', marginBottom:20}}>Rata-rata Bulan ini</Text>
+                    <ProgressCircle
+                      percent='100%'
+                      radius={60}
+                      borderWidth={8}
+                      color='#fff'
+                      shadowColor="#f4f4f4"
+                      bgColor="#fff">
+                    <View style={{flexDirection:'column', alignItems:'center'}}>
+                      <Text style={{ fontSize: 25 }}>{}</Text>
+                      <Text style={{ fontSize: 13 }}>Jam</Text>
                     </View>
-                      {/* Jam Kerja */}
-                    <View style={{
-                            flexDirection:'column',
-                            marginVertical:30,
-                            marginHorizontal:30,
-                            alignItems:'center',
-                            marginTop:10, borderWidth: 1, borderColor: '#d0d0d0',                    
-                            borderRadius:10,
-                            backgroundColor:'#fff'                    
-                    }}>
-                                
-                        <Text style={{ fontWeight:'bold', textAlign:"center", paddingVertical:10, paddingHorizontal:10,fontSize:22}}>Rata-Rata Bulan ini: </Text>
-                        <View style={styles.circle}>
-                            <Text style={{ fontWeight:'bold', fontSize:22}}>7.9</Text>
-                            <Text style={{ fontSize:17}}>jam</Text>
-                        </View>   
-                        <Text style={{ textAlign:"center", padding:10, fontSize:13}}>Terlambat: 3 kali (00 jam 56 menit)</Text>
-                        <Text style={{ textAlign:"center", fontSize:13,marginBottom:10}}>Pulang Cepat : 0</Text>                                         
+                  </ProgressCircle> 
+                  <View style={{marginTop:10, flexDirection: 'row'}}>
+                    <View style={{flexDirection:'column', marginRight: 10, alignItems:'center', justifyContent:'center'}}>
+                      <View style={{flexDirection: 'row', marginVertical: 10}}>
+                        <Text style={{fontWeight:'bold'}}>Terlambat : </Text>
+                        <Text>{}</Text>
+                      </View>
+                      <View style={{flexDirection: 'row'}}>
+                        <Text style={{fontWeight:'bold'}}>Pulang Cepat : </Text>
+                        <Text>{}</Text>
+                      </View>
                     </View>
-                      {/* Logout */}
-                      
-                    <TouchableOpacity onPress={() => {this.logout}}  style={{
-                                flexDirection:'column',
-                                alignItems:'center', 
-                                justifyContent:'center'
-                    }}>
-                        <View style={{
-                            width:140,
-                            paddingVertical:10,
-                            paddingHorizontal:10,
-                            height: 50,
-                            borderWidth: 1,
-                            borderColor:'#00AEEF',
-                            backgroundColor:'#00AEEF',
-                            justifyContent:'center',
-                            borderRadius: 17
-                        }} >
-                            <Text style={{textAlign:'center',fontSize:15, color:'white', fontWeight:"bold"}}>Log Out</Text>
-                        </View>                  
-                    </TouchableOpacity>                      
-                 </View>
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+            <View style={{alignItems:'center'}}>
+              <LinearGradient colors={['#00AEEF', '#00B9F2']} style={{borderRadius:10, width: 100}} style={styles.floatButton}>
+                <TouchableOpacity style={{paddingHorizontal:40,paddingVertical: 15}} onPress={() => onSignOut().then(() => this.props.navigation.navigate("Auth"))}>  
+                  <Text style={{color:'#fff', fontWeight:'bold'}}>Log Out</Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            </View>
             </View>
         );
     }
 }
 export default ProfileAbon;
 const styles= StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor:'white'
-    },   
-     circle: {
-        width: 120,
-        height: 120,
-        flexDirection:"column",
-        borderWidth: 6,
-        borderRadius: 100,
-        borderColor: '#00AEEF',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }
+  container: {
+    flex: 1,
+},
+headerBanner: {
+    height: 170,
+    width: '100%',
+    borderBottomLeftRadius: 90,
+    borderBottomRightRadius:90,
+},
+wrapper: {
+  paddingHorizontal: 20
+},
+boxHeader: {
+  elevation: 1,
+  backgroundColor: '#fff',
+  shadowOffset:{  width: 2,  height: 2,  },
+  shadowColor: '#e0e0e0',
+  shadowOpacity: 1.0,
+  paddingHorizontal: 10,
+  paddingVertical: 10,
+  marginTop: -60,
+  borderRadius: 10,
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent:'center'
+},
+boxProgress: {
+  elevation: 1,
+  backgroundColor: '#fff',
+  shadowOffset:{  width: 2,  height: 2,  },
+  shadowColor: '#e0e0e0',
+  shadowOpacity: 1.0,
+  paddingHorizontal: 10,
+  paddingVertical: 20,
+  marginTop: 15,
+  borderRadius: 10,
+  alignItems: 'center',
+  borderWidth: 1,
+  borderColor:'#e0e0e0'
+},
+floatButton :{
+  borderRadius: 10,
+  backgroundColor: '#ee6e73',
+  position: 'absolute',
+  bottom: 10,
+  alignItems:'center'
+}
 });

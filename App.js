@@ -88,13 +88,7 @@ const StackProfile=()=>(
        options={{ 
        headerShown:false,
      }}/>  
-      <Stack.Screen
-      name="logout"
-      component={logout}
-      options={{ 
-     headerShown:false,
-     }}
-    />
+     
 </Stack.Navigator>
 )
 
@@ -149,12 +143,7 @@ function Auth({  }) {
   </Stack.Navigator>
   );
 }
-function logout({  }) {
-  _simpleAlertHandler = () => {
-    //function to make simple alert
-    Alert.alert('Hello I am Simple Alert');
-  };
-}
+
 function BottomTabStack() {
   return (
     <Tab.Navigator
@@ -166,7 +155,7 @@ function BottomTabStack() {
        options={{
          tabBarLabel:'Home',
          tabBarIcon:({ color, size}) => (
-           <Icon name={'home'} color={color} size={24}/>
+           <Icon name={'home'} color={color} size={28}/>
          ),
      }}
      />
@@ -174,7 +163,7 @@ function BottomTabStack() {
      options={{
        tabBarLabel:'Agenda',
        tabBarIcon:({ color, size}) => (
-         <IconB name={'calendar-alt'} color={color} size={24}/>
+         <IconB name={'calendar-alt'} color={color} size={28}/>
        ),
      }}
      />
@@ -182,7 +171,7 @@ function BottomTabStack() {
      options={{
        tabBarLabel:'Riwayat',
        tabBarIcon:({ color, size}) => (
-         <IconC name={'list-alt'} color={color} size={24}/>
+         <IconC name={'list-alt'} color={color} size={28}/>
        ),
      }}
      />
@@ -190,7 +179,7 @@ function BottomTabStack() {
      options={{
        tabBarLabel:'Profile',
        tabBarIcon:({ color, size}) => (
-         <Icon name={'user'} color={color} size={24}/>
+         <Icon name={'user'} color={color} size={28}/>
        ),
      }}
      />

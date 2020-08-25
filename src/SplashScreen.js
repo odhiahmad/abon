@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ActivityIndicator,View, Image,Text } from 'react-native';
 
-import imagename from './logo.png' 
+import imagename from '../assets/logo.png' 
 import AsyncStorage from '@react-native-community/async-storage';
 
 const SplashScreen = props => {
@@ -22,7 +22,6 @@ const SplashScreen = props => {
 
     return (
       <View style={styles.viewStyles}>
-          <Image source={require('../assets/bg.png')} style={styles.backgroundImage}></Image>
         
           <View style={styles.logoAbon}>    
               <Image source={imagename}

@@ -6,14 +6,23 @@ import {
 } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import AsyncStorage from '@react-native-community/async-storage'; 
 
 class HomeAbon extends Component {
     constructor() {
         super();
-    
-        this.state = { currentTime: null, currentDay: null, greetingMessage:null,currentMonth: null }
+       
+        this.state = { currentTime: null, currentDay: null, greetingMessage:null,currentMonth: null, getValue :'' }
         this.daysArray = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
         this.monthArray = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus','September','Oktober','November','Desember'];
+      
+        AsyncStorage.getItem('nama_asn', (error, result) => {
+          if (result) {
+              this.setState({
+                nama_asn: result
+              });
+          }
+        });
       }
       componentDidMount() {
         this.timer = setInterval(() => {
@@ -24,10 +33,6 @@ class HomeAbon extends Component {
       componentWillUnmount() {
         clearInterval(this.timer);
       }
-    
-      // componentWillMount() {
-      //   this.getCurrentTime();
-      // }
    
       getCurrentTime = () => {
         let hour = new Date().getHours();
@@ -46,13 +51,13 @@ class HomeAbon extends Component {
         }
   
         const greetingMessage =
-              hour >= 4 && hour < 11 ? 
+              hour < 12 ? 
               'Selamat Pagi' :
-              hour >= 11 && hour <= 15 ? 
+              hour >= 12 && hour <= 16 ? 
               'Selamat Siang' :
-              hour >= 15 && hour <= 18 ? 
+              hour >= 16 && hour < 18 ? 
               'Selamat Sore' :
-              hour > 18 || hour < 4 ? 
+              hour >= 18  ? 
               'Selamat Malam' :
               'Welcome'
               this.setState({greetingMessage});
@@ -82,7 +87,7 @@ class HomeAbon extends Component {
                 }}>
             
                 <Text style={{color: '#000', fontWeight:'bold',  paddingVertical:10,
-                        paddingHorizontal:10,fontSize:24}}>{this.state.greetingMessage}, Zahra Maulidna, S.Pd</Text>
+                        paddingHorizontal:10,fontSize:24}}>{this.state.greetingMessage}, {this.state.nama_asn}</Text>
                 </View>
                  {/* Absen */}
                 <View style ={{
