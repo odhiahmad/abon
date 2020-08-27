@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import {
     View,
-    Text,Alert,ScrollView,Button,
+    Text,ScrollView,RefreshControl,
     StyleSheet, TouchableOpacity
 } from "react-native";
 
@@ -22,7 +22,12 @@ class ProfileAbon extends Component {
       isError: false,
       refreshing: false,
       isLoading: true,
-      data: []
+      average:'',
+      average_color:'',
+      average_percent:'',
+      jumlah_telat:'',
+      jam_telat:'',
+      pulang_cepat:''
     }
     AsyncStorage.getItem('nama_asn', (error, result) => {
       if (result) {
@@ -46,20 +51,74 @@ class ProfileAbon extends Component {
       }
     });
   }
-  
+  componentDidMount() {
+    this.feedData();
+  }
+
+  _onRefresh = () => {
+    this.setState({refreshing: true,isError:false});
+    this.feedData().then(() => {
+      this.setState({refreshing: false});
+    });
+  }
+
+  async feedData () {
+    return fetch('http://abon.sumbarprov.go.id/rest_abon/api/biodata_pegawai?nip='+this.state.username,{
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      if (responseJson.status === 'success'){
+        this.setState({
+          isLoading: false,
+          average_color: responseJson.durasi[0].average_color,
+          average_percent: responseJson.durasi[0].average_percent,        
+          average: responseJson.durasi[0].average,      
+          jumlah_telat: responseJson.rekap[0].jumlah_telat,      
+          jam_telat: responseJson.rekap[0].jam_telat,      
+          pulang_cepat: responseJson.rekap[0].pulang_cepat
+         
+        }, function() {
+          // do something with new state
+        });
+      } else {
+        alert('Sesi anda telah habis, silahkan Logout dan Login kembali')
+        this.setState({
+          isLoading: false,
+          refreshing: false,
+        })
+      }
+    })
+    .catch((error) => {
+      // console.error(error);
+      this.setState({
+        isLoading: false,
+        isError: true
+      })
+    });
+  }
+
     render(){
         return(         
             <View style={styles.container}>
-             <ScrollView>
+            <ScrollView refreshControl={
+              <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this._onRefresh}
+              />
+            }>
             <LinearGradient
-                colors={['#00AEEF', '#00B9F2']} style={styles.headerBanner}>
+                colors={['#00AEEF', '#00DDFA']} style={styles.headerBanner}>
               </LinearGradient>
               <View style={styles.wrapper}>
                 <View style={styles.boxHeader}>
                   <View style={{alignItems:'center'}}>
                   
                   <Text style={{fontSize:20, fontWeight:'bold', marginBottom:3, color:'#2D3137'}}>{this.state.nama_asn}</Text>
-                    <Text style={{fontSize:20, fontWeight:'bold', marginBottom:3, color:'#2D3137'}}>{this.state.username}</Text>
+                    <Text style={{fontSize:15, fontWeight:'bold', marginBottom:3, color:'#2D3137'}}>{this.state.username}</Text>
                     <Text style={{fontSize:12, fontWeight:'normal', marginBottom:3}}>{this.state.jabatan}</Text>
                     <Text style={{fontSize:12, fontWeight:'200', marginBottom:5, fontStyle:'italic'}}></Text>
                     <TouchableOpacity style={{borderWidth:1, borderColor:'#FF6063', padding:5,borderRadius:3,alignItems:'center',flexDirection:'row',justifyContent:'center'}}>
@@ -71,14 +130,15 @@ class ProfileAbon extends Component {
                 <View style={styles.boxProgress}>
                     <Text style={{marginBottom:10, fontSize:18, fontWeight:'bold', color:'#2D3137', marginBottom:20}}>Rata-rata Bulan ini</Text>
                     <ProgressCircle
-                      percent='100%'
+                      percent={this.state.average_percent}
                       radius={60}
                       borderWidth={8}
-                      color='#fff'
+                      color={this.state.average_color}
                       shadowColor="#f4f4f4"
-                      bgColor="#fff">
+                      bgColor="#fff"
+                  >
                     <View style={{flexDirection:'column', alignItems:'center'}}>
-                      <Text style={{ fontSize: 25 }}>{}</Text>
+                      <Text style={{ fontSize: 25 }}>{this.state.average}</Text>
                       <Text style={{ fontSize: 13 }}>Jam</Text>
                     </View>
                   </ProgressCircle> 
@@ -86,11 +146,11 @@ class ProfileAbon extends Component {
                     <View style={{flexDirection:'column', marginRight: 10, alignItems:'center', justifyContent:'center'}}>
                       <View style={{flexDirection: 'row', marginVertical: 10}}>
                         <Text style={{fontWeight:'bold'}}>Terlambat : </Text>
-                        <Text>{}</Text>
+                        <Text>{this.state.jumlah_telat} kali ({this.state.jam_telat})</Text>
                       </View>
                       <View style={{flexDirection: 'row'}}>
                         <Text style={{fontWeight:'bold'}}>Pulang Cepat : </Text>
-                        <Text>{}</Text>
+                        <Text>{this.state.pulang_cepat}</Text>
                       </View>
                     </View>
                   </View>
@@ -130,7 +190,7 @@ boxHeader: {
   shadowOpacity: 1.0,
   paddingHorizontal: 10,
   paddingVertical: 10,
-  marginTop: -60,
+  marginTop: -80,
   borderRadius: 10,
   flexDirection: 'row',
   alignItems: 'center',

@@ -1,140 +1,177 @@
 import React, { Component,useState } from "react";
 import {
-    View, Image, Alert,
-    Text, TextInput, TouchableOpacity,
+    View, Image, ActivityIndicator,
+    Text, TextInput, TouchableOpacity,Dimensions,
     StyleSheet,
 } from "react-native";
-
+import * as Device from 'expo-device';
 import AsyncStorage from '@react-native-community/async-storage';
 import Loader from './components/loader';
 
-const LoginActivity = props => {
-    let [username, setUserEmail] = useState('');
-    let [password, setUserPassword] = useState('');
-    let [loading, setLoading] = useState(false);
-    let [errortext, setErrortext] = useState('');
+class LoginActivity extends Component {
+
+  static navigationOptions = {
+    tabBarIcon: ({tintColor})=> (
+      <Icon name='ios-home-outline' style={{color:tintColor}} />
+    ),
+    header: null
+  }
   
-    const handleSubmitPress = () => {
-      setErrortext('');
-      if (!username) {
-        alert('Mohon masukkan NIP/Username anda');
-        return;
+
+  constructor (props) {
+    super(props)
+    this.state = {
+      username: '',
+      password:'',
+      loading: false,
+      device_id:'',
+      device_name:'',
+      device_device:'',
+      device_hardware:'',
+      token: '-'
+    }
+
+    this.reset = this.reset.bind(this)
+    this.handleLogin = this.handleLogin.bind(this)
+  }
+
+  reset(){
+    this.props.navigation.navigate('Home', { Name: this.state.username });
+  }
+  componentDidMount() {
+    this.setState ({
+      device_name:Device.modelName,
+      device_id:Expo.Constants.deviceId,
+      device_device : Device.brand,
+      device_hardware:Device.manufacturer
+    })
+  }
+
+  handleLogin () {
+    const {navigate} = this.props.navigation;
+    if (this.state.username == '' || this.state.password == '') {
+      alert('Masukan Username dan Password yang Benar')
+    } else {
+      this.setState({
+        loading: true
+      })
+      let details = {
+        username: this.state.username,
+        password: this.state.password,
+        device_id: this.state.device_id,
+        device_model: this.state.device_name,
+        device_device: this.state.device_device,
+        device_hardware: this.state.device_hardware,
+        token_firebase: this.state.token
+    };
+      let formBody = [];
+      for (let property in details) {
+      let encodedKey = encodeURIComponent(property);
+      let encodedValue = encodeURIComponent(details[property]);
+      formBody.push(encodedKey + "=" + encodedValue);
       }
-      if (!password) {
-        alert('Mohon masukkan password anda');
-        return;
-      }
-      setLoading(true);
-        let details = {
-                    'username': username,
-                    'password': password
-                };
-        let formBody = [];
-        for (let property in details) {
-            let encodedKey = encodeURIComponent(property);
-            let encodedValue = encodeURIComponent(details[property]);
-            formBody.push(encodedKey + "=" + encodedValue);
-        }
-      formBody = formBody.join('&');
-  
-      fetch('http://abon.sumbarprov.go.id/rest_abon/api/login', {
+      formBody = formBody.join('&');  
+
+      return fetch('http://abon.sumbarprov.go.id/rest_abon/api/login',{
         method: 'POST',
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: formBody
-    }).then((response) => response.json())
-        .then((json) => {
-          //Hide Loader
-          setLoading(false);
-
-          console.log(json);
-          if (json.response == 1) {
-            AsyncStorage.setItem('pegawai', json.result[0].pegawai);
-            AsyncStorage.setItem('nama_asn', json.result[0].nama_asn);            
-            AsyncStorage.setItem('opd', json.result[0].opd);           
-            AsyncStorage.setItem('nm_opd', json.result[0].nm_opd);           
-            AsyncStorage.setItem('sub_opd', json.result[0].sub_opd);           
-            AsyncStorage.setItem('nm_sub_opd', json.result[0].nm_sub_opd);           
-            AsyncStorage.setItem('jabatan', json.result[0].jabatan);           
-            AsyncStorage.setItem('nip', json.result[0].nip);                  
-            AsyncStorage.setItem('id_eselon', json.result[0].id_eselon);                   
-            AsyncStorage.setItem('eselon', json.result[0].eselon);                 
-            AsyncStorage.setItem('pangkat', json.result[0].pangkat);                 
-            AsyncStorage.setItem('jenjang', json.result[0].jenjang);                 
-            AsyncStorage.setItem('group', json.result[0].group);
-
-            props.navigation.navigate('Home', { Name: username });
-          } else {
-            setErrortext('Mohon periksa kembali NIP/Username atau password Anda');
-            console.log('Mohon periksa kembali NIP/Username atau password Anda');
-          }
-        })
-        .catch(error => {
-          //Hide Loader
-          setLoading(false);
-          console.error(error);
+      })
+      .then((response) => response.json())
+      .then((json) => {
+        if (json.response == 1) {
+          AsyncStorage.setItem('pegawai', json.result[0].pegawai);
+          AsyncStorage.setItem('username', json.result[0].username);  
+          AsyncStorage.setItem('nama_asn', json.result[0].nama_asn);            
+          AsyncStorage.setItem('opd', json.result[0].opd);           
+          AsyncStorage.setItem('nm_opd', json.result[0].nm_opd);           
+          AsyncStorage.setItem('sub_opd', json.result[0].sub_opd);           
+          AsyncStorage.setItem('nm_sub_opd', json.result[0].nm_sub_opd);           
+          AsyncStorage.setItem('jabatan', json.result[0].jabatan);           
+          AsyncStorage.setItem('nip', json.result[0].nip);                  
+          AsyncStorage.setItem('id_eselon', json.result[0].id_eselon);                   
+          AsyncStorage.setItem('eselon', json.result[0].eselon);                 
+          AsyncStorage.setItem('pangkat', json.result[0].pangkat);                 
+          AsyncStorage.setItem('jenjang', json.result[0].jenjang);                 
+          AsyncStorage.setItem('group', json.result[0].group);
+          this.props.navigation.navigate('Home');
+         
+          this.setState({
+            loading: true
+          })
+          this.reset()
+        } else {
+          console.log(this.state.device_name);
+          console.log(this.state.device_id);
+          console.log(this.state.device_device);
+          console.log(this.state.device_hardware);
+          alert(json.message)
+          this.setState({
+            password: '',
+            loading: false
+          })
+        }
+      })
+      .catch((error) => {
+        console.error(error);
           alert('Anda sedang tidak terhubung ke jaringan internet')
-        });
-    };
+      });
 
-return (
-    <View style={styles.mainBody}>
-      <Loader loading={loading} />
-    
-        <View style={{ marginTop: 10 }}>
-         
-            <View style={{ alignItems: 'center' }}>
-              <Image
-                source={require('../assets/logo.png')}
-                style={{
-                  width: '80%',
-                  height: 100,
-                  resizeMode: 'contain',
-                  margin: 10,
-                }}
-              />
+    }
+  }
+  render(){
+    if (this.state.loading) {
+      return (
+        <ActivityIndicator
+              style={styles.indicator}
+              animating={true}
+              size="large"
+            />
+      );
+    }
+    return (
+        <View style={styles.mainBody}>      
+          
+            <View style={styles.logoContainer}>
+                  <Image
+                    source={require('../assets/logo.png')}
+                    style={{
+                      width: 140,
+                      height: 130,
+                    }}
+                  />
+                <View style={styles.SectionStyle}>
+                <TextInput
+                        placeholder="NIP / Username"
+                        onChangeText={ (text) => this.setState({ username: text }) }
+                        underlineColorAndroid='transparent'
+                        style={styles.inputStyle}/>
+              
+                </View>
+                <View style={styles.SectionStyle}>
+                <TextInput
+                        placeholder="Password"
+                        onChangeText={ (text) => this.setState({ password: text }) }
+                        keyboardType="default"
+                        underlineColorAndroid='transparent'
+                        style={styles.inputStyle}
+                        secureTextEntry={true} />
+                </View>
+              
+                <TouchableOpacity
+                  style={styles.buttonStyle}
+                  activeOpacity={0.5}
+                  onPress={this.handleLogin}>
+                  <Text style={styles.buttonTextStyle}>Login</Text>
+                </TouchableOpacity>
+              
+            
             </View>
-            <View style={styles.SectionStyle}>
-            <TextInput
-                    placeholder="NIP / Username"
-                    onChangeText={username => setUserEmail(username)}
-                    underlineColorAndroid='transparent'
-                    style={styles.inputStyle}/>
-            {/* <TextInput
-               onChangeText={username => setUserEmail(username)}
-                returnKeyType='next'
-             
-                keyboardType='default'
-                autoCapitalize = 'none'
-                underlineColorAndroid='transparent'
-                onSubmitEditing={() => this.passwordInput.focus()}
-                style={{borderColor:'#e0e0e0',borderWidth:1, paddingVertical:10, paddingHorizontal:20, borderRadius:20, fontSize: 16,marginBottom:10}}
-                placeholder='NIP / Username'/> */}
-            </View>
-            <View style={styles.SectionStyle}>
-            <TextInput
-                    placeholder="Password"
-                    onChangeText={password => setUserPassword(password)}
-                    keyboardType="default"
-                    underlineColorAndroid='transparent'
-                    style={styles.inputStyle}
-                    secureTextEntry={true} />
-            </View>
-            {errortext != '' ? (
-              <Text style={styles.errorTextStyle}> {errortext} </Text>
-            ) : null}
-            <TouchableOpacity
-              style={styles.buttonStyle}
-              activeOpacity={0.5}
-              onPress={handleSubmitPress}>
-              <Text style={styles.buttonTextStyle}>Login</Text>
-            </TouchableOpacity>
-           
-         
         </View>
-    </View>
-  );
+    );
+  }
 };
 export default LoginActivity;
 
@@ -144,6 +181,12 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       backgroundColor: '#fff',
     },
+    indicator: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: 80
+    },
     SectionStyle: {
       flexDirection: 'row',
       height: 40,
@@ -152,12 +195,20 @@ const styles = StyleSheet.create({
       marginRight: 35,
       margin: 10,
     },
+    logoContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent:'center',
+      marginBottom: 20,
+      height: Dimensions.get('window').height / 1
+    },
     buttonStyle: {
       backgroundColor: '#00AEEF',
       borderWidth: 0,
       color: '#FFFFFF',
       borderColor: '#00AEEF',
       height: 40,
+      width:100,
       alignItems: 'center',
       borderRadius: 10,
       marginLeft: 35,
@@ -178,16 +229,5 @@ const styles = StyleSheet.create({
       borderWidth: 1,
       borderRadius: 10,
       borderColor: 'gray',
-    },
-    registerTextStyle: {
-      color: '#FFFFFF',
-      textAlign: 'center',
-      fontWeight: 'bold',
-      fontSize: 14,
-    },
-    errorTextStyle: {
-      color: 'red',
-      textAlign: 'center',
-      fontSize: 12,
-    },
+    }
 });

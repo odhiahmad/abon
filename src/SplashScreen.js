@@ -27,13 +27,14 @@ const SplashScreen = props => {
               <Image source={imagename}
                       style={{ width: 160, height: 160, alignItems:'center' }}/>   
           </View> 
-          <ActivityIndicator
-            animating={animating}
-            color='red'
-            size="large"
-            style={styles.activityIndicator}
-          />
-          <Text style={ styles.text }>1.0</Text>
+          <View style={styles.bottomView}>
+            <ActivityIndicator
+              animating={animating}
+              color='red'
+              size="large"
+              style={styles.activityIndicator}/>
+            <Text style={ styles.text }>1.0</Text>
+          </View>
       </View>
     );
   
@@ -45,7 +46,14 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
   },
- 
+  bottomView: {
+    width: '100%',
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',    
+    position: 'absolute', //Here is the trick
+    bottom: 2, //Here is the trick
+  },
   backgroundImage: {
     width:'100%', height:'100%',
     flex: 1,justifyContent: 'center',
@@ -58,6 +66,7 @@ const styles = {
   },
   text: {
     fontSize: 10,
+    color:'black'
   },
   activityIndicator: {
     alignItems: 'center',

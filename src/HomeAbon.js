@@ -1,198 +1,352 @@
 import React, { Component } from "react";
 import {
-    View,Platform ,
-    Text,
+    View,Platform , ActivityIndicator,
+    Text,RefreshControl,StatusBar, SafeAreaView, ScrollView, 
     StyleSheet,TouchableOpacity
 } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
+
+import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome5';
-import AsyncStorage from '@react-native-community/async-storage'; 
+import ErrorState from "./components/ErrorState";
+import moment from 'moment';
+var g = null; 
+var m = moment();
+
+var split_siang = 12 
+var split_sore = 16 
+var split_malam = 18 
+var currentHour = parseFloat(m.format("HH"));
+
+if(currentHour >= split_siang && currentHour < split_sore) {
+  g = "Siang";
+} if(currentHour >= split_sore && currentHour < split_malam) {
+  g = "Sore";
+}else if(currentHour >= split_malam) {
+  g = "Malam";
+} else if (currentHour < split_siang) {
+  g = "Pagi";
+}
 
 class HomeAbon extends Component {
-    constructor() {
-        super();
-       
-        this.state = { currentTime: null, currentDay: null, greetingMessage:null,currentMonth: null, getValue :'' }
-        this.daysArray = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-        this.monthArray = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus','September','Oktober','November','Desember'];
-      
-        AsyncStorage.getItem('nama_asn', (error, result) => {
-          if (result) {
-              this.setState({
-                nama_asn: result
-              });
-          }
-        });
-      }
-      componentDidMount() {
-        this.timer = setInterval(() => {
-          this.getCurrentTime();
-        }, 1000);
-      }
-       
-      componentWillUnmount() {
-        clearInterval(this.timer);
-      }
-   
-      getCurrentTime = () => {
-        let hour = new Date().getHours();
-        let minutes = new Date().getMinutes();
-        let seconds = new Date().getSeconds();
-        var that = this;
-        var date = new Date().getDate(); //Current Date
-        var month = new Date().getMonth() + 1; //Current Month
-        var year = new Date().getFullYear(); //Current Year
-        if (minutes < 10) {
+  static navigationOptions = {
+    header: null
+  }
+  componentDidMount() {
+    this.getCurrentTime();
+  }
+
+  getCurrentTime = () =>
+  {
+      let hour = new Date().getHours();
+      let minutes = new Date().getMinutes();
+      let seconds = new Date().getSeconds();
+      let date = new Date().getDate(); //Current Date
+      let month = new Date().getMonth() + 1; //Current Month
+      let year = new Date().getFullYear();
+      let am_pm = 'PM';
+
+      if( minutes < 10 )
+      {
           minutes = '0' + minutes;
-        }
-    
-        if (seconds < 10) {
-          seconds = '0' + seconds;
-        }
-  
-        const greetingMessage =
-              hour < 12 ? 
-              'Selamat Pagi' :
-              hour >= 12 && hour <= 16 ? 
-              'Selamat Siang' :
-              hour >= 16 && hour < 18 ? 
-              'Selamat Sore' :
-              hour >= 18  ? 
-              'Selamat Malam' :
-              'Welcome'
-              this.setState({greetingMessage});
-        
-        this.setState({ currentTime: hour + ':' + minutes + ':' + seconds + ' ' });
+      }
 
-        this.monthArray.map((item, keys) => {
-          if (keys == new Date().getMonth()) {
-            this.setState({ currentMonth: item  });
+      if( seconds < 10 )
+      {
+          seconds = '0' + seconds;
+      }
+
+      if( hour < 10 )
+      {
+          // hour = hour - 12;
+          hour = '0'+ hour;
+      }
+
+      // if( hour == 0 )
+      // {
+      //     hour = 12;
+      // }
+
+      if( new Date().getHours() < 12 )
+      {
+          am_pm = 'AM';
+      }
+
+      this.setState({ currentTime: hour + ':' + minutes + ':' + seconds });
+
+      this.monthArray.map((item, keys) => {
+        if (keys == new Date().getMonth()) {
+          this.setState({ currentMonth: item  });
+        }
+      })
+      
+      this.daysArray.map(( item, key ) =>
+      {
+          if( key == new Date().getDay() )
+          {
+              this.setState({ currentDay: item.charAt(0).toUpperCase() + item.slice(1) + ', ' + date + ' ' + this.state.currentMonth +' ' + year});
           }
-        })
-        
-        this.daysArray.map((item, key) => {
-          if (key == new Date().getDay()) {
-            this.setState({ currentDay: item +', ' + date + ' ' +  this.state.currentMonth + ' ' + year });
-          }
+      })        
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+
+  componentDidMount() {
+    this.feedData();
+
+
+    this.timer = setInterval(() =>
+    {
+        this.getCurrentTime();
+    }, 1000);
+  }
+
+  constructor(props) {
+    super(props)
+    currentDate = new Date();
+    this.state={
+      curTime: currentDate.getHours()+':'+currentDate.getMinutes(),
+      curDate: currentDate.toDateString(),
+      isLoading: true,
+      nama_lengkap: 'User', 
+      username: '0000000',
+      tap_in: '',
+      tap_out: '',
+      data: [],
+      currentTime: null, 
+      currentDay: null,
+      currentMonth: null,
+      greeting: g,
+      isError: false,
+      refreshing: false,
+    }
+    AsyncStorage.getItem('nama_asn', (error, result) => {
+      if (result) {
+          this.setState({
+            nama_lengkap: result
+          });
+      }
+    });
+    AsyncStorage.getItem('username', (error, result) => {
+      if (result) {
+          this.setState({
+            username: result
+          });
+      }
+    });
+    this.monthArray = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus','September','Oktober','November','Desember'];
+    this.daysArray = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
+  }
+
+  _onRefresh = () => {
+    this.setState({refreshing: true,isError:false});
+    this.feedData().then(() => {
+      this.setState({refreshing: false});
+    });
+  }
+  async feedData () {
+    
+    return fetch('http://abon.sumbarprov.go.id/rest_abon/api/biodata_pegawai?nip='+this.state.username, { 
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      } 
+    })
+    .then((response) => response.json())
+    .then((json) => {
+      console.log(json);
+      if (json.status === 'success'){   
+        this.setState({
+          isLoading: false,
+          
+          nip: json.biodata[0].nip,
+          nama_lengkap: json.biodata[0].nama_lengkap,
+          tap_in: json.waktu_kerja[0].tap_in,
+          tap_out: json.waktu_kerja[0].tap_out,
+         
+        }, function() {
+          // do something with new state
+        });     
+      } else {
+        alert('Sesi anda telah habis, silahkan Logout dan Login kembali')
+        this.setState({
+          isLoading: false,
+          refreshing: false,
         })
       }
-    render(){
-        return(
-          
-            <View style={styles.container}>
-                <View style={{flexDirection:'row', width: 280,
-                            borderColor:'grey', color:'black',
-                            marginTop:50, marginLeft:20,marginBottom:20,
-                            alignItems:'center', borderRadius:5, margin:4
-                }}>
-            
-                <Text style={{color: '#000', fontWeight:'bold',  paddingVertical:10,
-                        paddingHorizontal:10,fontSize:24}}>{this.state.greetingMessage}, {this.state.nama_asn}</Text>
-                </View>
-                 {/* Absen */}
-                <View style ={{
-                     paddingHorizontal :20
-                 }}>
-                    <View style={{
-                        flexDirection:'row',
-                        paddingVertical:10,
-                        paddingHorizontal:10,
-                        backgroundColor:'#fff', justifyContent:'center',
-                        borderTopRightRadius:10,
-                        borderTopLeftRadius:10,
-                        borderBottomLeftRadius:10,
-                        borderBottomRightRadius:10
-                    }}>
-                        <View style={{
-                            padding:10
-                        }}>
-                        <Text style={styles.timeText}>{this.state.currentTime}</Text>
-                        <Text style={styles.daysText}>{this.state.currentDay}</Text>
-                            
-                            <View style={{
-                                justifyContent: 'space-between',
-                                marginTop:20,
-                                borderWidth: 1,
-                                borderColor: '#d0d0d0',
-                                borderRadius: 1
-                                }} >
-
-                            </View>
-                            <View style={{
-                                textAlign:'center',
-                                flexDirection:'row',
-                                paddingHorizontal:10,
-                                paddingTop:20,
-                                justifyContent:'space-around'
-                            }}>
-                                <View style={{
-                                   alignItems:'center',
-                                   textAlign:'center',
-                                    flexDirection:'column',
-                                    justifyContent:'space-around'
-                                }}>
-                            
-                                    <Text style={{fontSize: 28, textAlign:'center'}}>07:28:07</Text>
-                                    <Text style={{textAlign:'center'}}>Absen Masuk</Text>
-                                </View>
-                                <View style={{
-                                    width:0,
-                                    marginRight:20,
-                                    marginLeft:20,
-                                    height: 50,
-                                    marginTop:10,
-                                    borderWidth: 1,
-                                    borderColor: '#d0d0d0',
-                                    borderRadius: 1
-                                    }} >
-
-                                </View>
-                                <View style={{
-                                    textAlign:'center',
-                                    flexDirection:'column',
-                                    justifyContent:'space-around'
-                                }}>
-                                    <Icon name={'fingerprint'} size={45} style={{color:'#74C6F4', textAlign:'center'}} />
-                                    <Text style={{ marginTop: 2,textAlign:'center'}}>Absen Keluar</Text>
-                                </View>
-                            </View>                            
-                        </View>
-                    </View>
-                      {/* Tombol Absen */}
-                      <TouchableOpacity onPress={() => {this.props.navigation.push('AmbilAbsen')}}  style={{
-                        flexDirection:'column',                  
-                        justifyContent: 'space-between'
-                    }}>
-                    <LinearGradient
-                      
-                        colors={['#FF8B7F', '#FF595F', '#FF7570']}
-                        style={{flexDirection:'row', alignItems: 'center', borderRadius: 5, marginTop:10, 
-                                 borderTopRightRadius:10, borderTopLeftRadius:10}}>
-                    
-                    <Icon name={'fingerprint'} size={58} style={{ color:'#74C6F4', padding:20}} />
-                    <Text style={{color: '#fff',  justifyContent: 'space-between', fontSize:17, width:210, padding:2}}>Tekan tombol disamping untuk mengambil absen keluar</Text>
-            
-                </LinearGradient>
-                </TouchableOpacity>
-                </View>
-
-            </View>
-        );
+    })
+    .catch((error) => {
+      // console.error(error);
+      this.setState({
+        isLoading: false,
+        // isError: true
+      })
+    });
+  }
+  render() {
+    const {navigate} = this.props.navigation;
+    const preview = {uri: "../assets/logo.png"};
+    const uri = 'https://res.cloudinary.com/dyacj8kac/image/upload/v1545113147/finger2.png';
+    
+    if (this.state.isLoading) {
+      return (
+        <View style={{flex:1, alignItems:'center'}}>
+          <ActivityIndicator
+            style={styles.indicator}
+            animating={true}
+            size="large"
+          /> 
+          {/* <Lottie
+            ref={animation => { this.animation = animation; }}
+            source={require('../assets/simple.json')}
+          /> */}
+        </View>
+        
+      );
     }
+
+    if (this.state.isError) {
+      return (
+        <ErrorState refresh={this._onRefresh} />
+      );
+    }
+    
+    return (
+        <SafeAreaView style={{flex: 1, backgroundColor: '#EFEFEF',paddingTop: Platform.OS === 'android' ? 25 : 0}}>
+          <StatusBar
+            backgroundColor={'transparent'}
+            translucent={false}
+          />
+          <ScrollView 
+            refreshControl={
+              <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this._onRefresh}
+              />
+            }>
+            <View style={styles.wrapperHeader}>
+              <Text style={styles.textHeader}>Selamat {this.state.greeting}, {this.state.nama_lengkap}</Text>
+            </View>
+            <View style={styles.wrapper}>
+              <View style={styles.boxStatus}>
+                <View style={{
+                  alignItems: 'center',
+                  borderBottomWidth: 1,
+                  borderBottomColor: '#e0e0e0',
+                }}>
+                  <Text style={{fontSize: 42, fontWeight: '200', color:'#1095E8', fontWeight: 'bold'}}>{this.state.currentTime}</Text>
+                  <Text style={{paddingBottom:20, fontSize:20}}>{this.state.currentDay}</Text>
+                </View>
+                <View style={{
+                  flexDirection:'row', 
+                  alignItems:'center', 
+                  justifyContent: 'space-between',
+                  paddingTop:20
+                }}>
+                  <View style={{
+                    alignItems: 'center',
+                    width:'50%',
+                    borderRightWidth: 1,
+                    borderRightColor: '#e0e0e0'
+                  }}>
+                    <View style={{alignItems:'center', paddingHorizontal:10}}>
+                    {
+                          this.state.tap_in === '' 
+                            ? <Icon name={'fingerprint'} size={41} style={{color:'#74C6F4', textAlign:'center'}} />
+                            : <Text style={{fontSize:30}}>{this.state.tap_in}</Text>
+                        }
+                      <Text style={{fontSize:17, marginTop:5}}>Absen Masuk</Text>
+                    </View>
+                  </View>
+                  <View style={{
+                    alignItems: 'center',
+                    width:'50%'
+                  }}>
+                    <View style={{alignItems:'center', paddingHorizontal:10}}>
+                    {
+                          this.state.tap_out === '' 
+                            ?  <Icon name={'fingerprint'} size={41} style={{color:'#74C6F4', textAlign:'center'}} />                                  
+                            : <Text style={{fontSize:30}}>{this.state.tap_out}</Text>
+                        }
+                      <Text style={{fontSize:17, marginTop:5}}>Absen Keluar</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            </View>
+            <View style={styles.wrapper}>
+              <TouchableOpacity onPress={() => navigate("AmbilAbsen",{ absen_type: this.state.tap_in ? 2 : 1 })}>
+                <LinearGradient
+                  colors={['#FF9484', '#FF4955']} 
+                  style={{borderRadius:10, 
+                  paddingHorizontal:20,
+                  paddingVertical:20,
+                  flexDirection:'row',
+                  alignItems:'center',
+                  shadowOffset:{  width: 2,  height: 2,  },
+                  shadowColor: '#e0e0e0',
+                  shadowOpacity: 1.0,
+                  elevation:1}}
+                  start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>                
+                  <Icon name={'fingerprint'} size={61} style={{color:'#74C6F4', textAlign:'center'}} />               
+                  <View style={{flexShrink: 1, marginLeft:10}}>
+                     <Text style={{fontSize:17, color:'#fff'}}>Tekan tombol disamping untuk mengambil absen {this.state.tap_in ? 'keluar' : 'masuk'}</Text>
+                  </View>
+                </LinearGradient>              
+              </TouchableOpacity>
+            </View>            
+          </ScrollView>
+        </SafeAreaView>
+    );
+}
 }
 export default HomeAbon;
 const styles= StyleSheet.create({
-    container: {
-      flex: 1,
-      paddingTop: (Platform.OS === 'ios') ? 20 : 0,
-    },
-    
-    timeText: {
-      fontWeight:'bold',textAlign:"center",alignItems: 'center',fontSize:39,
-      color: '#74C6F4'
-    },
-    daysText: {
-      color: '#000',
-      fontSize: 21,textAlign:"center",alignItems: 'center'
-    }
+  container: {
+    flex: 1,
+    alignItems: 'center'
+  },
+  wrapper : {
+    paddingHorizontal: 20
+  },
+  wrapperHeader : {
+    paddingHorizontal: 20,
+    marginTop: 20
+  },
+  textHeader: {
+    fontSize:25,
+    marginTop:30,
+    fontWeight: 'bold',
+    color:'#2D3137'
+  },
+  boxStatus: {
+    backgroundColor: '#F8F9FA',
+    padding: 30,
+    borderRadius: 10,
+    marginVertical: 20,
+    shadowOffset:{  width: 2,  height: 2,  },
+    shadowColor: '#e0e0e0',
+    shadowOpacity: 1.0,
+    elevation:1
+  },
+  boxItem: {
+    backgroundColor: '#F8F9FA',
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 15,
+    shadowOffset:{  width: 2,  height: 2,  },
+    shadowColor: '#e0e0e0',
+    shadowOpacity: 1.0,
+    elevation:1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent:'space-between'
+  },
+  indicator: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 80
+  }
 });
