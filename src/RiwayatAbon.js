@@ -1,6 +1,6 @@
-import React, { Component } from "react";
+import React, { Component} from "react";
 import {
-    View, Platform,FlatList,
+    View, FlatList,
     Text,ActivityIndicator,RefreshControl,
     StyleSheet, SafeAreaView,ScrollView, TouchableOpacity
 } from "react-native";
@@ -8,9 +8,10 @@ import {
 import moment from 'moment';
 require('moment/locale/id.js');
 import AsyncStorage from '@react-native-community/async-storage';
-import DateTimePicker from 'react-native-modal-datetime-picker';
 import Icon from 'react-native-vector-icons/Feather';
+import YearMonthPicker from './components/yearMonthPicker';
 import IconB from 'react-native-vector-icons/FontAwesome';
+import EmptyState from './components/EmptyState';
 
 class RiwayatAbon extends Component {
     
@@ -27,6 +28,7 @@ class RiwayatAbon extends Component {
       };
       constructor(props){
         super(props);
+        
         this.state={
           isError: false,
           refreshing: false,
@@ -34,7 +36,11 @@ class RiwayatAbon extends Component {
           username:'uname',
           currentMonth:null,
           fullday:null,
-          date:null
+          date:null,
+          setDate:'',
+          selectedYear:'',
+          selectedMonth:'',
+          data:[]
         }
 
         AsyncStorage.getItem('username', (error, result) => {
@@ -48,6 +54,17 @@ class RiwayatAbon extends Component {
     
       }
     
+      showPickerrr = ()=> {
+        const { startYear, endYear, selectedYear, selectedMonth } = this.state;
+        this.picker
+            .show({startYear, endYear, selectedYear, selectedMonth})
+            .then(({year, month}) => {
+              this.setState({
+                selectedYear: year,
+                selectedMonth: month
+              })
+            })
+      }
       componentDidMount() {
         this.feedData();
         this.getCurrentTime();
@@ -74,9 +91,9 @@ class RiwayatAbon extends Component {
           this.setState({refreshing: false});
         });
       }
-    
+      
       async feedData () {
-        return fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip=zahra_maulidna&date=2020-08',{
+        return fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip='+this.state.username+'&date='+this.state.selectedYear+'-0'+this.state.selectedMonth,{
           method: 'GET',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -94,7 +111,7 @@ class RiwayatAbon extends Component {
               // do something with new state
             });
           } else {
-            alert(responseJson.harian)
+            // alert(responseJson.harian)
             this.setState({
               isLoading: false,
               refreshing: false,
@@ -111,6 +128,7 @@ class RiwayatAbon extends Component {
         });
       }
     render(){
+    
         const {navigate} = this.props.navigation;
 
         if (this.state.isLoading) {
@@ -143,7 +161,8 @@ class RiwayatAbon extends Component {
                 } */}
               <View style={styles.wrapperHeader}>
                     <Text style={styles.textHeader}>Riwayat Absen</Text>
-                    <TouchableOpacity onPress={this._showDateTimePicker}  style={{
+                    <Text style={{paddingVertical:5, fontSize:15, color:'#2D3137',paddingLeft:5}}>{this.state.username}</Text>
+                    <TouchableOpacity onPress={this.showPickerrr}  style={{
                             flexDirection:'column',
                             alignItems:'center',
                             justifyContent:'center'
@@ -155,51 +174,84 @@ class RiwayatAbon extends Component {
                         }} >
                         <IconB name={'calendar-o'} size={20} style={{color:'#00AEEF', textAlign:'center'}} />
                         
-                        </View>                
+                        </View>   
+                       
                     </TouchableOpacity>  
-                    <DateTimePicker
-                        isVisible={this.state.isDateTimePickerVisible}
-                        onConfirm={this._handleDatePicked}
-                        onCancel={this._hideDateTimePicker}
-                
-                    />        
+                   
               </View>
+              <Text style={styles.yearMonthText}>{this.state.selectedYear}-{this.state.selectedMonth}</Text>
+                    <YearMonthPicker
+                      ref={(picker) => this.picker=picker}
+                    />                      
               <Text style={{fontSize:17, paddingHorizontal: 20, paddingVertical:10,fontWeight: 'bold'}}>{this.state.currentMonth}</Text>
               <View style={styles.wrapper}>
+              <ScrollView refreshControl={
+                  <RefreshControl
+                    refreshing={this.state.refreshing}
+                    onRefresh={this._onRefresh}/>
+                  }>
+                  {
+                    this.state.data.length == 0 ?
+                    (
+                      <View style={{padding:10}}>
+                        <EmptyState />
+                      </View>
+                    ) :
+                    (
+                      <View />
+                    )
+                  }
+                
                 <FlatList
                   data={this.state.data}
                   renderItem={({ item }) => (
                     <View style={styles.boxItem}>
-                      <View>
+                      <View>                   
+                        
                         <Text style={{paddingVertical:5, fontSize:16}}>{moment(item.date).format("dddd, DD MMMM YYYY ")}</Text>
                         <View style={{flexDirection:'row', alignItems:'center'}}>
                           <Icon name="corner-up-right" size={16} style={{color:'#1095E8'}} />
                           <Text style={{paddingVertical:5, fontSize:15, color:'#2D3137',paddingLeft:5}}>{item.tap_in} di {item.absen_in_loc}</Text>
+                         
                         </View>
+                        {
+                            item.valid_in == 2 
+                              ? <Text style={{fontSize:13, color:'red', marginLeft:20}}><Icon name="alert-triangle" size={15} style={{color:'red'}} /> Device Anda tidak sesuai</Text> 
+                              : <View></View>
+                        }
                         <View style={{flexDirection:'row', alignItems:'center'}}>
                           <Icon name="corner-up-left" size={16} style={{color:'#FF7A74'}} />                        
                           {
-                            item.tap_out  === '' 
-                            ?  <Text style={{fontSize:30, color:'blue', fontWeight:'bold'}}>-</Text>                                   
+                            item.tap_out  === null
+                            ?  <Text style={{fontSize:30, color:'black',paddingLeft:5}}>-</Text>                                   
                             :  <Text style={{paddingVertical:5, fontSize:15, color:'#2D3137',paddingLeft:5}}>{item.tap_out} di {item.absen_out_loc}</Text>
                           }
                          </View>
+                         {
+                        item.valid_out == 2 ? <Text style={{fontSize:13, color:'red', marginLeft:20}}><Icon name="alert-triangle" size={15} style={{color:'red'}} /> Device Anda tidak sesuai</Text> : <View />
+                      }
                       </View>
+                      
                       <View style={{flexDirection:'row', alignItems:'center'}}>
                           {
-                            item.duration  === '' 
-                            ?   <Text style={{fontSize:30, color:'blue', fontWeight:'bold'}}>-</Text>                                   
+                            item.duration  === null
+                            ?  <View style={{flexDirection:'row', alignItems:'center',fontWeight:'bold'}}>
+                                 <Text style={{fontSize:35, color:'#1095E8',paddingLeft:5, fontWeight:'bold'}}>-</Text> 
+                                 <Text style={{fontSize:18}}> Jam</Text> 
+                               </View>                                       
                             :  <View style={{flexDirection:'row', alignItems:'center'}}>
-                                      <Text style={{fontSize:30, color:'#1095E8',fontWeight:'bold' }}>{item.duration}</Text>    
-                                      <Text style={{fontSize:14}}> Jam</Text>
+                                      <Text style={{fontSize:35, color:'#1095E8',fontWeight:'bold' }}>{item.duration}</Text>    
+                                      <Text style={{fontSize:18}}> Jam</Text>
                                 </View>                
                           }
                        
                       </View>
+                      
                     </View>
                   )}
                   keyExtractor={item => item.date}
                 />
+                </ScrollView>
               </View>
               
           </SafeAreaView>

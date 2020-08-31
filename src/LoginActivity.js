@@ -1,4 +1,4 @@
-import React, { Component,useState } from "react";
+import React, { Component } from "react";
 import {
     View, Image, ActivityIndicator,
     Text, TextInput, TouchableOpacity,Dimensions,

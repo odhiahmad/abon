@@ -67,8 +67,13 @@ const StackAgenda=()=>(
      }}
     />
     <Stack.Screen name="RiwayatIzin" component={RiwayatIzin}
-        options={{ 
-       headerShown:false,
+       options={{ title :'Riwayat Izin',
+     headerStyle:{
+       backgroundColor:'white',
+       elevation:0
+     },
+     headerShown:true,
+     headerTitleStyle:{ alignSelf: 'center'},
      }}
     />
 </Stack.Navigator>
