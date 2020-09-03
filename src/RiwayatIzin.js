@@ -8,7 +8,6 @@ import {
 import moment from 'moment';
 require('moment/locale/id.js');
 import AsyncStorage from '@react-native-community/async-storage';
-import DateTimePicker from 'react-native-modal-datetime-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import EmptyState from './components/EmptyState';
 import ErrorState from './components/ErrorState';
@@ -126,8 +125,8 @@ class RiwayatIzin extends Component {
               </View> */}
             <View style={{flexDirection:'row', marginTop:10,marginVertical:5,marginHorizontal:5,
                     borderColor:'grey', color:'black',justifyContent:'space-between', marginRight:10}}>
-                <Text style={{color: '#000',fontSize:18, marginLeft:10, padding:10}}>Agustus 2020</Text>
-                <View style={{flexDirection:'row', marginVertical:5,marginHorizontal:5,borderColor:'grey', color:'black',justifyContent:'space-between', marginRight:10}}>
+                           
+                <View style={{flexDirection:'row',marginVertical:10,marginHorizontal:10}}>
                     <TouchableOpacity onPress={this.feedData}  style={{
                             flexDirection:'column',
                             alignItems:'center',
@@ -167,7 +166,7 @@ class RiwayatIzin extends Component {
                 {
                   this.state.data.length == 0 ?
                   (
-                    <View style={{padding:10}}>
+                    <View>
                       <EmptyState />
                     </View>
                   ) :                
@@ -177,8 +176,8 @@ class RiwayatIzin extends Component {
                       renderItem={({ item }) => (
                       <View style={styles.boxItem}>
                         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'space-between'}}>
-                            <Text style={{paddingVertical:5, fontSize:16}}>{moment(item.date).format("dddd, DD MMMM YYYY ")}</Text>
-                            <View style={styles.wrapper}>
+                            <Text style={{paddingVertical:5, fontSize:16}}>{moment(item.tanggal).format("dddd, DD MMMM YYYY ")}</Text>
+                            <View style={styles.wrapper1}>
                                     {
                                     item.status  === '1' 
                                     ?   <Text style={{fontSize:16, color:'blue', fontWeight:'bold'}}>ACC</Text>                                   
@@ -221,6 +220,10 @@ const styles= StyleSheet.create({
         marginHorizontal:10, marginVertical:10,
       },
       wrapper : {
+        paddingHorizontal: 10,
+        marginBottom:80
+      },
+      wrapper1 : {
         paddingHorizontal: 10
       },
       textHeader: {

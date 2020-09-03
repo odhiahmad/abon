@@ -94,8 +94,7 @@ class LoginActivity extends Component {
           AsyncStorage.setItem('id_eselon', json.result[0].id_eselon);                   
           AsyncStorage.setItem('eselon', json.result[0].eselon);                 
           AsyncStorage.setItem('pangkat', json.result[0].pangkat);                 
-          AsyncStorage.setItem('jenjang', json.result[0].jenjang);                 
-          AsyncStorage.setItem('group', json.result[0].group);
+          AsyncStorage.setItem('jenjang', json.result[0].jenjang);   
           this.props.navigation.navigate('Home');
          
           this.setState({
