@@ -109,11 +109,11 @@ export default class YearMonthPicker extends Component {
                 >
                     <View style={styles.toolBar}>
                         <TouchableOpacity style={styles.toolBarButton} onPress={this.onCancelPress}>
-                            <Text style={styles.toolBarButtonText}>Batal</Text>
+                            <Text style={styles.toolBarButtonText}>BATAL</Text>
                         </TouchableOpacity>
                         <View style={{ flex: 1 }} />
                         <TouchableOpacity style={styles.toolBarButton} onPress={this.onConfirmPress}>
-                            <Text style={styles.toolBarButtonText}>OK</Text>
+                            <Text style={styles.toolBarButtonText}>OKE</Text>
                         </TouchableOpacity>
                     </View>
                     <View style={styles.innerContainer}>
@@ -149,6 +149,7 @@ const styles = StyleSheet.create({
     },
     outerContainer: {
         backgroundColor: 'white',
+        position: 'absolute',
         left: 0,
         right: 0,
         bottom: 0
@@ -171,6 +172,7 @@ const styles = StyleSheet.create({
         color: '#2d4664',
     },
     innerContainer: {
+        flex: 1,
         flexDirection: 'row',
     },
     picker: {

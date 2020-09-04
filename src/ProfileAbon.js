@@ -32,6 +32,7 @@ constructor(props) {
     jumlah_telat:'',
     jam_telat:'',
     pulang_cepat:'',
+    durasi:[],
     pulang_cepat:''
   }
   AsyncStorage.getItem('nama_asn', (error, result) => {
@@ -80,6 +81,7 @@ async feedData () {
     if (responseJson.status === 'success'){
       this.setState({
         isLoading: false,
+          durasi : responseJson.durasi,
           average_color: responseJson.durasi[0].average_color,
           average_percent: responseJson.durasi[0].average_percent,        
           average: responseJson.durasi[0].average,      
@@ -138,8 +140,7 @@ render() {
                   borderWidth={8}
                   color={this.state.average_color}
                   shadowColor="#f4f4f4"
-                  bgColor="#fff"
-              >
+                  bgColor="#fff">
                 <View style={{flexDirection:'column', alignItems:'center'}}>
                   <Text style={{ fontSize: 25 }}>{this.state.average}</Text>
                   <Text style={{ fontSize: 13 }}>Jam</Text>

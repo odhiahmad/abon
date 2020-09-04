@@ -1,10 +1,11 @@
 import React, { Component} from "react";
 import {
-    View, FlatList,
+    View, FlatList,Dimensions,
     Text,ActivityIndicator,RefreshControl,
     StyleSheet, SafeAreaView,ScrollView, TouchableOpacity
 } from "react-native";
 
+const Screen = Dimensions.get('window');
 import moment from 'moment';
 require('moment/locale/id.js');
 import AsyncStorage from '@react-native-community/async-storage';
@@ -54,37 +55,32 @@ class RiwayatAbon extends Component {
     
       }
     
-      showPickerrr = ()=> {
+      showPicker = ()=> {
         const { startYear, endYear, selectedYear, selectedMonth } = this.state;
         this.picker
             .show({startYear, endYear, selectedYear, selectedMonth})
             .then(({year, month}) => {
               this.setState({
                 selectedYear: year,
-                selectedMonth: month
+                selectedMonth: month,
+                
               })
-            })
+             
+              this.getCurrentTime();
+              this.feedData();
+            })            
       }
-      componentDidMount() {
-        this.feedData();
-        this.getCurrentTime();
-      }
+
       getCurrentTime = () =>
-      {
-        
-        let year = new Date().getFullYear();
-        var today = new Date();
-        this.state.date=today.getFullYear()+'-0'+parseInt(today.getMonth()+1) ;
-        this.state.fullday= this.state.currentMonth +' ' + today.getFullYear
-
-        this.monthArray.map((item, keys) => {
-          if (keys == new Date().getMonth()) {
-            this.setState({ currentMonth: item + ' ' + year});
-            
-          }
-        })
-      }
-
+      {        
+        const {selectedMonth} = this.state;
+          this.monthArray.map((item, keys) => {
+            if (keys == selectedMonth-1) {
+              this.setState({ bulan: item  });
+            }
+          })                       
+      }     
+    
       _onRefresh = () => {
         this.setState({refreshing: true,isError:false});
         this.feedData().then(() => {
@@ -92,8 +88,9 @@ class RiwayatAbon extends Component {
         });
       }
       
-      async feedData () {
-        return fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip='+this.state.username+'&date='+this.state.selectedYear+'-0'+this.state.selectedMonth,{
+      async feedData () {        
+        const {selectedYear, selectedMonth} = this.state;       
+        return fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip='+this.state.username+'&date='+selectedYear+'-0'+selectedMonth,{
           method: 'GET',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -127,8 +124,8 @@ class RiwayatAbon extends Component {
           })
         });
       }
-    render(){
-    
+    render(){    
+      const {selectedYear, selectedMonth} = this.state;    
         const {navigate} = this.props.navigation;
 
         if (this.state.isLoading) {
@@ -162,28 +159,23 @@ class RiwayatAbon extends Component {
               <View style={styles.wrapperHeader}>
                     <Text style={styles.textHeader}>Riwayat Absen</Text>
                     <Text style={{paddingVertical:5, fontSize:15, color:'#2D3137',paddingLeft:5}}>{this.state.username}</Text>
-                    <TouchableOpacity onPress={this.showPickerrr}  style={{
+                    <TouchableOpacity onPress={this.showPicker}  style={{
                             flexDirection:'column',
                             alignItems:'center',
-                            justifyContent:'center'
-                        }}>
-                        <View style={{
-                            width: 20,
-                            height: 20,                           
-                            justifyContent:'center'
-                        }} >
-                        <IconB name={'calendar-o'} size={20} style={{color:'#00AEEF', textAlign:'center'}} />
-                        
-                        </View>   
-                       
-                    </TouchableOpacity>  
+                            marginRight:10,
+                            justifyContent:'center'}}>
+                      <View style={{  
+                              backgroundColor: 'white',
+                              borderColor:'#00AEEF',
+                              borderRadius: 2,                  
+                              justifyContent:'center'}}>
+                           <IconB name={'calendar-o'} size={20} style={{color:'#00AEEF', textAlign:'center'}} />
+                      </View>                
+                    </TouchableOpacity>                   
                    
               </View>
-              <Text style={styles.yearMonthText}>{this.state.selectedYear}-{this.state.selectedMonth}</Text>
-                    <YearMonthPicker
-                      ref={(picker) => this.picker=picker}
-                    />                      
-              <Text style={{fontSize:17, paddingHorizontal: 20, paddingVertical:10,fontWeight: 'bold'}}>{this.state.currentMonth}</Text>
+                                    
+              <Text style={{fontSize:17, paddingHorizontal: 20, paddingVertical:10,fontWeight: 'bold'}}>{selectedMonth}- {selectedYear}</Text>
               <View style={styles.wrapper}>
               <ScrollView refreshControl={
                   <RefreshControl
@@ -243,16 +235,18 @@ class RiwayatAbon extends Component {
                                       <Text style={{fontSize:35, color:'#1095E8',fontWeight:'bold' }}>{item.duration}</Text>    
                                       <Text style={{fontSize:18}}> Jam</Text>
                                 </View>                
-                          }
-                       
-                      </View>
-                      
+                          }                       
+                      </View>                      
                     </View>
                   )}
                   keyExtractor={item => item.date}
                 />
                 </ScrollView>
+                
               </View>
+              <YearMonthPicker
+                ref={(picker) => this.picker=picker}
+              />  
               
           </SafeAreaView>
         );

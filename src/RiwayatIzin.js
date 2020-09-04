@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import {
-    View,Picker,
+    View,Dimensions,
     Text,FlatList,ActivityIndicator,
     StyleSheet, TouchableOpacity
 } from "react-native";
 
+const Screen = Dimensions.get('window');
 import moment from 'moment';
 require('moment/locale/id.js');
 import AsyncStorage from '@react-native-community/async-storage';
@@ -24,6 +25,8 @@ class RiwayatIzin extends Component {
           isLoading: true,
           startYear: 2020,
           endYear: 2050,
+          currentMonth:null,
+          bulan:null,
           currentDay:null,
           data:[]
         }
@@ -45,19 +48,38 @@ class RiwayatIzin extends Component {
             .then(({year, month}) => {
               this.setState({
                 selectedYear: year,
-                selectedMonth: month
+                selectedMonth: month,
+                
               })
-            })
+             
+              this.getCurrentTime();
+              this.feedDataBulan();
+            })            
+      }
+      getCurrentTime = () =>
+      {        
+        const {selectedMonth} = this.state;
+          this.monthArray.map((item, keys) => {
+            if (keys == selectedMonth-1) {
+              this.setState({ bulan: item  });
+            }
+          })
+          
+             
       }
       componentDidMount() {
         this.feedData();
       }
-    
+     
       _onRefresh = () => {
         this.setState({refreshing: true,isError:false});
         this.feedData().then(() => {
           this.setState({refreshing: false});
         });
+        this.feedDataBulan().then(() => {
+          this.setState({refreshing: false});
+        });
+       
       }
       feedData = async () => {
         return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin_pegawai?nip='+this.state.username,{
@@ -81,7 +103,44 @@ class RiwayatIzin extends Component {
               isLoading: false,
               refreshing: false,
             })
-          }  console.log(this.state.date);
+          }  console.log(this.setState.perbulan);
+        })
+        
+        .catch((error) => {
+          // console.error(error);
+          this.setState({
+            isLoading: false,
+            isError: true
+          })
+        });
+      }
+
+      feedDataBulan = async () => {
+        const {selectedYear, selectedMonth} = this.state;        
+      
+        console.log(this.state.bulan);
+        return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin_pegawai?nip='+this.state.username+'&date='+selectedYear+'-0'+selectedMonth,{
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }          
+        })
+        .then((response) => response.json())
+        .then((responseJson) => {
+          console.log(responseJson);
+          if (responseJson.status === 'success'){
+            this.setState({
+              isLoading: false,
+              data: responseJson.harian,
+            }, function() {
+              // do something with new state
+            });
+          } else {
+            this.setState({
+              isLoading: false,
+              refreshing: false,
+            })
+          }  
         })
         
         .catch((error) => {
@@ -110,19 +169,10 @@ class RiwayatIzin extends Component {
         return (
           <ErrorState refresh={this._onRefresh} />
         );
-      }
-  
-  
+      } 
+      
         return(
           <View style={styles.container}>
-          {/* header */}
-              {/* <View style={styles.wrapperHeader}>
-                  <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
-                  
-                  <Icon name="angle-left" size={30} style={{color:'#00AEEF'}} />
-                  </TouchableOpacity>            
-                  <Text style={{color: '#000', fontWeight:'bold',fontSize:20, marginLeft:10}}>Riwayat Izin</Text>
-              </View> */}
             <View style={{flexDirection:'row', marginTop:10,marginVertical:5,marginHorizontal:5,
                     borderColor:'grey', color:'black',justifyContent:'space-between', marginRight:10}}>
                            
@@ -153,16 +203,15 @@ class RiwayatIzin extends Component {
                           <Text style={{color: '#00AEEF',marginHorizontal:5,marginVertical:5,fontWeight:'bold',fontSize:16}}>Per Bulan</Text>
                       </View>                
                     </TouchableOpacity>
-                   
+                    <Text style={styles.yearMonthText}>{this.state.bulan} {selectedYear}</Text>
+                          
                 </View>
                 
             </View>   
-            <Text style={styles.yearMonthText}>{selectedYear}-{selectedMonth}</Text>
-                    <YearMonthPicker
-                      ref={(picker) => this.picker=picker}
-                    />                      
+         
                 {/* list riwayat */}
             <View style={styles.wrapper}>
+            
                 {
                   this.state.data.length == 0 ?
                   (
@@ -203,6 +252,9 @@ class RiwayatIzin extends Component {
                   )}/>
                 }
             </View>
+            <YearMonthPicker
+                ref={(picker) => this.picker=picker}
+              />  
           </View>
         );
     }
