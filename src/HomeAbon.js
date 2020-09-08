@@ -32,10 +32,60 @@ class HomeAbon extends Component {
   static navigationOptions = {
     header: null
   }
-  componentDidMount() {
-    this.getCurrentTime();
+  constructor(props) {
+    super(props)
+    currentDate = new Date();
+    this.state={
+      isLoading: true,
+      nama_lengkap: 'User', 
+      username: '0000000',
+      tap_in: '',
+      tap_out: '',
+      data: [],
+      currentTime: null, 
+      currentDay: null,
+      currentMonth: null,
+      greeting: g,
+      isError: false,
+      refreshing: false,
+    }
+    AsyncStorage.getItem('nama_asn', (error, result) => {
+      if (result) {
+          this.setState({
+            nama_lengkap: result
+          });
+      }
+    });
+    AsyncStorage.getItem('username', (error, result) => {
+      if (result) {
+          this.setState({
+            username: result
+          });
+      }
+    });
+    this.monthArray = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus','September','Oktober','November','Desember'];
+    this.daysArray = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
   }
 
+  componentWillUnmount() {
+    clearInterval(this.timer);
+  }
+
+  componentDidMount() {
+    this.feedData();
+    this.timer = setInterval(() =>
+    {
+        this.getCurrentTime();
+    }, 1000);
+  }
+
+  _onRefresh = () => {
+    this.setState({refreshing: true,isError:false});
+    this.feedData().then(() => {
+      this.setState({refreshing: false});
+    });
+  }
+  
   getCurrentTime = () =>
   {
       let hour = new Date().getHours();
@@ -88,63 +138,7 @@ class HomeAbon extends Component {
           }
       })        
   }
-  componentWillUnmount() {
-    clearInterval(this.timer);
-  }
-
-  componentDidMount() {
-    this.feedData();
-
-
-    this.timer = setInterval(() =>
-    {
-        this.getCurrentTime();
-    }, 1000);
-  }
-
-  constructor(props) {
-    super(props)
-    currentDate = new Date();
-    this.state={
-      curTime: currentDate.getHours()+':'+currentDate.getMinutes(),
-      curDate: currentDate.toDateString(),
-      isLoading: true,
-      nama_lengkap: 'User', 
-      username: '0000000',
-      tap_in: '',
-      tap_out: '',
-      data: [],
-      currentTime: null, 
-      currentDay: null,
-      currentMonth: null,
-      greeting: g,
-      isError: false,
-      refreshing: false,
-    }
-    AsyncStorage.getItem('nama_asn', (error, result) => {
-      if (result) {
-          this.setState({
-            nama_lengkap: result
-          });
-      }
-    });
-    AsyncStorage.getItem('username', (error, result) => {
-      if (result) {
-          this.setState({
-            username: result
-          });
-      }
-    });
-    this.monthArray = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus','September','Oktober','November','Desember'];
-    this.daysArray = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
-  }
-
-  _onRefresh = () => {
-    this.setState({refreshing: true,isError:false});
-    this.feedData().then(() => {
-      this.setState({refreshing: false});
-    });
-  }
+ 
   async feedData () {
     
     return fetch('http://abon.sumbarprov.go.id/rest_abon/api/biodata_pegawai?nip='+this.state.username, { 

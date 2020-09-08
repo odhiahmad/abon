@@ -15,8 +15,7 @@ class LoginActivity extends Component {
       <Icon name='ios-home-outline' style={{color:tintColor}} />
     ),
     header: null
-  }
-  
+  }  
 
   constructor (props) {
     super(props)
@@ -131,49 +130,45 @@ class LoginActivity extends Component {
       );
     }
     return (
-        <View style={styles.mainBody}>      
+      <View style={styles.mainBody}>                
+        <View style={styles.logoContainer}>
+              <Image
+                source={require('../assets/logo.png')}
+                style={{
+                  width: 140,
+                  height: 130,
+                }}
+              />
+            <View style={styles.SectionStyle}>
+            <TextInput
+                    placeholder="NIP / Username"
+                    onChangeText={ (text) => this.setState({ username: text }) }
+                    underlineColorAndroid='transparent'
+                    style={styles.inputStyle}/>
           
-            <View style={styles.logoContainer}>
-                  <Image
-                    source={require('../assets/logo.png')}
-                    style={{
-                      width: 140,
-                      height: 130,
-                    }}
-                  />
-                <View style={styles.SectionStyle}>
-                <TextInput
-                        placeholder="NIP / Username"
-                        onChangeText={ (text) => this.setState({ username: text }) }
-                        underlineColorAndroid='transparent'
-                        style={styles.inputStyle}/>
-              
-                </View>
-                <View style={styles.SectionStyle}>
-                <TextInput
-                        placeholder="Password"
-                        onChangeText={ (text) => this.setState({ password: text }) }
-                        keyboardType="default"
-                        underlineColorAndroid='transparent'
-                        style={styles.inputStyle}
-                        secureTextEntry={true} />
-                </View>
-              
-                <TouchableOpacity
-                  style={styles.buttonStyle}
-                  activeOpacity={0.5}
-                  onPress={this.handleLogin}>
-                  <Text style={styles.buttonTextStyle}>Login</Text>
-                </TouchableOpacity>
-              
-            
             </View>
+            <View style={styles.SectionStyle}>
+            <TextInput
+                    placeholder="Password"
+                    onChangeText={ (text) => this.setState({ password: text }) }
+                    keyboardType="default"
+                    underlineColorAndroid='transparent'
+                    style={styles.inputStyle}
+                    secureTextEntry={true} />
+            </View>
+          
+            <TouchableOpacity
+              style={styles.buttonStyle}
+              activeOpacity={0.5}
+              onPress={this.handleLogin}>
+              <Text style={styles.buttonTextStyle}>Login</Text>
+            </TouchableOpacity>         
         </View>
+      </View>
     );
   }
 };
 export default LoginActivity;
-
 const styles = StyleSheet.create({
     mainBody: {
       flex: 1,

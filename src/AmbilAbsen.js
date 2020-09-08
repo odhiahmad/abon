@@ -13,81 +13,82 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import IconB from 'react-native-vector-icons/MaterialIcons';
 
 class AmbilAbsen extends Component {
-    constructor (props) {
-        super(props)
-        this.state = {
-          locationResult: null,
-          distance: null,
-          isLoading: true,
-          showAlert: false,
-          opd:'',
-          username:'',
-          locationStatus: null,
-          distance_max: null
+  constructor (props) {
+    super(props)
+    this.state = {
+      locationResult: null,
+      distance: null,
+      isLoading: true,
+      showAlert: false,
+      opd:'',
+      username:'',
+      locationStatus: null,
+      distance_max: null
+    }
+    AsyncStorage.getItem('opd', (error, result) => {
+        if (result) {
+            this.setState({
+                opd: result
+            });
         }
-        AsyncStorage.getItem('opd', (error, result) => {
-            if (result) {
-                this.setState({
-                    opd: result
-                });
-            }
-          });
-          AsyncStorage.getItem('username', (error, result) => {
-            if (result) {
-                this.setState({
-                    username: result
-                });
-            }
-          });
-      }
-    
-      componentDidMount() {
-        this._getLocationAsync();
-      }
-    
-      showAlert = () => {
-        this.setState({
-          showAlert: true
-        });
-      };
-     
-      hideAlert = () => {
-        this.setState({
-          showAlert: false
-        });
-      };
-      tap_absen_in = async () => {
-        this.setState({
-          isLoading: true
-        })
-        let details = {
-            'lat': this.state.lat,
-            'long': this.state.long,            
-            'nip': this.state.nip,
-            'opd': this.state.opd,
-        };
-        let formBody = [];
-        for (let property in details) {
-            let encodedKey = encodeURIComponent(property);
-            let encodedValue = encodeURIComponent(details[property]);
-            formBody.push(encodedKey + "=" + encodedValue);
+      });
+      AsyncStorage.getItem('username', (error, result) => {
+        if (result) {
+            this.setState({
+                username: result
+            });
         }
-        formBody = formBody.join('&');
-        fetch('http://abon.sumbarprov.go.id/rest_abon/api/cek_metode', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          }, body: formBody
-        })
-        .then((response) => response.json())
-        .then((responseJson) => {
-          this.reset(responseJson.time, responseJson.date);
-        })
-        .catch((error) => {
-          console.error(error);
-          alert('Anda sedang absen in tidak terhubung ke jaringan internet')
-        });
-      }
+      });
+  }
+    
+  componentDidMount() {
+    this._getLocationAsync();
+  }
+    
+  showAlert = () => {
+    this.setState({
+      showAlert: true
+    });
+  };
+    
+  hideAlert = () => {
+    this.setState({
+      showAlert: false
+    });
+  };
+
+  tap_absen_in = async () => {
+    this.setState({
+      isLoading: true
+    })
+    let details = {
+        'lat': this.state.lat,
+        'long': this.state.long,            
+        'nip': this.state.nip,
+        'opd': this.state.opd,
+    };
+    let formBody = [];
+    for (let property in details) {
+        let encodedKey = encodeURIComponent(property);
+        let encodedValue = encodeURIComponent(details[property]);
+        formBody.push(encodedKey + "=" + encodedValue);
+    }
+    formBody = formBody.join('&');
+    fetch('http://abon.sumbarprov.go.id/rest_abon/api/cek_metode', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      }, body: formBody
+    })
+    .then((response) => response.json())
+    .then((responseJson) => {
+      this.reset(responseJson.time, responseJson.date);
+    })
+    .catch((error) => {
+      console.error(error);
+      alert('Anda sedang absen in tidak terhubung ke jaringan internet')
+    });
+  }
     
     //   tap_absen_out = async () => {
     //     this.setState({

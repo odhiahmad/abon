@@ -20,40 +20,35 @@ class ProfileAbon extends Component {
 constructor(props) {
   super(props)
   this.state={
-    nama_asn: 'User',
-    username: '0000000',
+    nama_asn: 'Nama ASN',
+    username: '',
     jabatan: 'Jabatan',
     isError: false,
     refreshing: false,
     isLoading: true, 
     average:'',
     average_color:'',
-    average_percent:'',
+    average_percent:'0',
     jumlah_telat:'',
     jam_telat:'',
     pulang_cepat:'',
     durasi:[],
     pulang_cepat:''
   }
-  AsyncStorage.getItem('nama_asn', (error, result) => {
-    if (result) {
-        this.setState({
-          nama_asn: result
-        });
+
+  AsyncStorage.getItem('nama_asn').then((nama_asn) => {
+    if(nama_asn){
+        this.setState({nama_asn: nama_asn});
     }
   });
-  AsyncStorage.getItem('username', (error, result) => {
-    if (result) {
-        this.setState({
-          username: result
-        });
+  AsyncStorage.getItem('username').then((username) => {
+    if(username){
+        this.setState({username: username});
     }
   });
-  AsyncStorage.getItem('jabatan', (error, result) => {
-    if (result) {
-        this.setState({
-            jabatan: result
-        });
+  AsyncStorage.getItem('jabatan').then((jabatan) => {
+    if(jabatan){
+        this.setState({jabatan: jabatan});
     }
   });
 }
@@ -69,7 +64,10 @@ _onRefresh = () => {
   });
 }
 
-async feedData () {
+feedData=()=>{
+  this.setState({
+      isLoading:false
+  }) 
   return fetch('http://abon.sumbarprov.go.id/rest_abon/api/biodata_pegawai?nip='+this.state.username,{
     method: 'GET',
     headers: {
@@ -109,7 +107,7 @@ async feedData () {
 }
 
 render() {
-    return (
+    return (      
       <View style={styles.container}>
         <ScrollView refreshControl={
           <RefreshControl

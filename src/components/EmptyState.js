@@ -6,8 +6,7 @@ import {
 } from "react-native";
 
 class EmptyState extends Component {
-  render() {
-  
+  render() {  
     return (
       <View style={styles.boxItem}>
         <Text style={{color:'#2D3137', fontSize:18}}>Belum Ada Data...</Text>

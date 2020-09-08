@@ -5,13 +5,12 @@ import imagename from '../assets/logo.png'
 import AsyncStorage from '@react-native-community/async-storage';
 
 const SplashScreen = props => {
-  //State for ActivityIndicator animation
   let [animating, setAnimating] = useState(true);
 
   useEffect(() => {
     setTimeout(() => {
       setAnimating(false);
-      AsyncStorage.getItem('pegawai').then(value =>
+      AsyncStorage.getItem('username').then(value =>
         props.navigation.navigate(
           value === null ? 'Auth' : 'Home'
         )
@@ -19,25 +18,22 @@ const SplashScreen = props => {
     }, 5000);
   }, []);
 
-
-    return (
-      <View style={styles.viewStyles}>
-        
-          <View style={styles.logoAbon}>    
-              <Image source={imagename}
-                      style={{ width: 160, height: 160, alignItems:'center' }}/>   
-          </View> 
-          <View style={styles.bottomView}>
-            <ActivityIndicator
-              animating={animating}
-              color='red'
-              size="large"
-              style={styles.activityIndicator}/>
-            <Text style={ styles.text }>1.0</Text>
-          </View>
+  return (
+    <View style={styles.viewStyles}>
+      <View style={styles.logoAbon}>    
+          <Image source={imagename}
+                  style={{ width: 160, height: 160, alignItems:'center' }}/>   
+      </View> 
+      <View style={styles.bottomView}>
+        <ActivityIndicator
+          animating={animating}
+          color='red'
+          size="large"
+          style={styles.activityIndicator}/>
+        <Text style={ styles.text }>1.0</Text>
       </View>
-    );
-  
+    </View>
+  );
 }
 
 const styles = {
