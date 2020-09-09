@@ -30,6 +30,7 @@ class RiwayatAbon extends Component {
       currentTime:null,
       data:[]
     }
+    this.setUsername = this.setUsername.bind(this);
     AsyncStorage.getItem('username').then((username) => {
       if(username){
           this.setState({username: username});
@@ -55,11 +56,19 @@ class RiwayatAbon extends Component {
   }
     
   componentDidMount() {
-      this.feedData();        
+      this.feedData();
+      this.setUsername();
       this.timer = setInterval(() =>
       {
           this.getCurrentTime();
       }, 1000);
+  }
+
+  async setUsername() {
+    this.setState({
+      username: await AsyncStorage.getItem('username')
+    }, console.log(this.state.username))
+    
   }
 
   getCurrentTime = () =>
@@ -81,7 +90,7 @@ class RiwayatAbon extends Component {
     })     
     const {selectedYear, selectedMonth} = this.state;   
     if (selectedYear == null){     
-      console.log(this.state.username); 
+      // console.log(this.state.username); 
       fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip='+this.state.username+'&date='+this.state.currentMonth,{
         method: 'GET',
         headers: {
@@ -89,6 +98,7 @@ class RiwayatAbon extends Component {
         }
       }).then((response)=> response.json())
       .then((json)=> {
+        console.log(json)
         if (json.status === 'success'){
           this.setState({
             isLoading: false,
@@ -114,6 +124,7 @@ class RiwayatAbon extends Component {
           }
       }).then((response)=> response.json())
       .then((json)=> {
+        // console.log(this.state.username); 
         if (json.status === 'success'){
           this.setState({
             isLoading: false,

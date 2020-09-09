@@ -1,11 +1,11 @@
 import React, { Component } from "react";
 import {
-    View, Image, ActivityIndicator,
+    View, Image, ActivityIndicator, AsyncStorage,
     Text, TextInput, TouchableOpacity,Dimensions,
     StyleSheet,
 } from "react-native";
 import * as Device from 'expo-device';
-import AsyncStorage from '@react-native-community/async-storage';
+// import AsyncStorage from '@react-native-community/async-storage';
 import Loader from './components/loader';
 
 class LoginActivity extends Component {
