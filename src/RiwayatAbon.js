@@ -1,6 +1,6 @@
 import React, { Component} from "react";
 import {
-    View, FlatList,Dimensions,
+    View, FlatList,Dimensions,AsyncStorage,
     Text,ActivityIndicator,RefreshControl,
     StyleSheet, SafeAreaView,ScrollView, TouchableOpacity
 } from "react-native";
@@ -8,7 +8,7 @@ import {
 const Screen = Dimensions.get('window');
 import moment from 'moment';
 require('moment/locale/id.js');
-import AsyncStorage from '@react-native-community/async-storage';
+// import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/Feather';
 import YearMonthPicker from './components/yearMonthPicker';
 import IconB from 'react-native-vector-icons/FontAwesome';
@@ -26,7 +26,8 @@ class RiwayatAbon extends Component {
       startYear: 2020,
       endYear: 2050,
       date:null, 
-      currentMonth: null,
+      currentMonth:null,
+      months:'',
       currentTime:null,
       data:[]
     }
@@ -38,7 +39,28 @@ class RiwayatAbon extends Component {
     });
     this.monthArray = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus','September','Oktober','November','Desember'];
   }
+    
+  componentDidMount() {
+    this.setUsername();
+    this.feedData();            
+    this.getCurrentTime();
+  }
 
+  async setUsername() {
+    this.setState({
+      username: await AsyncStorage.getItem('username')
+    }, console.log(this.state.username))
+    
+  }
+
+  _onRefresh = () => {
+    this.setState({refreshing: true,isError:false});
+    this.feedData().then(() => {
+      this.setState({refreshing: false});
+    });
+  }
+
+  
   showPicker = ()=> {
     const { startYear, endYear, selectedYear, selectedMonth } = this.state;
     this.picker
@@ -54,43 +76,30 @@ class RiwayatAbon extends Component {
           this.feedData();
         })            
   }
-    
-  componentDidMount() {
-      this.feedData();
-      this.setUsername();
-      this.timer = setInterval(() =>
-      {
-          this.getCurrentTime();
-      }, 1000);
-  }
-
-  async setUsername() {
-    this.setState({
-      username: await AsyncStorage.getItem('username')
-    }, console.log(this.state.username))
-    
-  }
-
+  
   getCurrentTime = () =>
   {        
-    let month = new Date().getMonth() + 1; //Current Month
+    var currentDate = new Date();
+    let month = ((currentDate.getMonth()+1)>=10)? (currentDate.getMonth()+1) : '0' + (currentDate.getMonth()+1);
     let year = new Date().getFullYear();
+    
     const {selectedMonth} = this.state;
       this.monthArray.map((item, keys) => {
         if (keys == selectedMonth-1) {
           this.setState({ bulan: item  });
         }
       })    
-      this.setState({ currentMonth: year + '-0' + month });    
+      
+      this.setState({ currentMonth: year + '-' + month });
   }
-
-  feedData=()=>{ 
+  
+  feedData () {
     this.setState({
-        isLoading:false
-    })     
+      isLoading:false
+   })    
     const {selectedYear, selectedMonth} = this.state;   
-    if (selectedYear == null){     
-      // console.log(this.state.username); 
+    this.state.months=((selectedMonth>=10)? (selectedMonth) : '0' + (selectedMonth));
+    if (selectedYear == null){          
       fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip='+this.state.username+'&date='+this.state.currentMonth,{
         method: 'GET',
         headers: {
@@ -98,10 +107,9 @@ class RiwayatAbon extends Component {
         }
       }).then((response)=> response.json())
       .then((json)=> {
-        console.log(json)
         if (json.status === 'success'){
           this.setState({
-            isLoading: false,
+            isLoading: false, refreshing: true,
             data: json.harian,
           }, function() {
           });
@@ -117,17 +125,16 @@ class RiwayatAbon extends Component {
       });
     }
     else{
-      fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip='+this.state.username+'&date='+selectedYear+'-0'+selectedMonth,{
+      fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip='+this.state.username+'&date='+selectedYear+'-'+this.state.months,{
           method: 'GET',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
       }).then((response)=> response.json())
       .then((json)=> {
-        // console.log(this.state.username); 
         if (json.status === 'success'){
           this.setState({
-            isLoading: false,
+            isLoading: false, refreshing: true,
             data: json.harian,
           }, function() {
           });
@@ -169,7 +176,8 @@ class RiwayatAbon extends Component {
       <SafeAreaView style={{backgroundColor:'#EFEFEF', flex:1}}>
         <View style={styles.wrapperHeader}>
             <Text style={styles.textHeader}>Riwayat Absen</Text>
-            <Text style={{paddingVertical:5, fontSize:15, color:'#2D3137',paddingLeft:5}}>{this.state.currentMonth}</Text>
+            <Text style={{paddingVertical:5, fontSize:10, color:'#2D3137',paddingLeft:5}}>{this.state.currentMonth}</Text>
+            <Text style={{paddingVertical:5, fontSize:10, color:'#2D3137',paddingLeft:5}}>{this.state.username}</Text>
             <TouchableOpacity onPress={this.showPicker}  style={{
                     flexDirection:'column',
                     alignItems:'center',
@@ -187,7 +195,13 @@ class RiwayatAbon extends Component {
                                 
         <Text style={styles.yearMonthText}>{this.state.bulan} {selectedYear}</Text>
 
-        <View style={styles.wrapper}>                  
+        <View style={styles.wrapper}   
+        refreshControl={
+              <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this._onRefresh}
+              />
+            }>        
           {                   
             this.state.data.length == 0 ?
             (
@@ -203,7 +217,6 @@ class RiwayatAbon extends Component {
           
           <FlatList
             data={this.state.data}
-            refreshControl={<RefreshControl refreshing={this.state.isLoading} onRefresh={this.feedData}/>}
             keyExtractor={item => item.date}
             renderItem={({ item }) => (
               <View style={styles.boxItem}>
