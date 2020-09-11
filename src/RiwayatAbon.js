@@ -2,7 +2,7 @@ import React, { Component} from "react";
 import {
     View, FlatList,Dimensions,
     Text,ActivityIndicator,RefreshControl,
-    StyleSheet, SafeAreaView,ScrollView, TouchableOpacity
+    StyleSheet, SafeAreaView, TouchableOpacity
 } from "react-native";
 
 const Screen = Dimensions.get('window');
@@ -16,8 +16,7 @@ import EmptyState from './components/EmptyState';
 
 class RiwayatAbon extends Component {
   constructor(props){
-    super(props);
-    
+    super(props);    
     this.state={
       isError: false,
       refreshing: false,
@@ -26,16 +25,30 @@ class RiwayatAbon extends Component {
       startYear: 2020,
       endYear: 2050,
       date:null, 
-      currentMonth: null,
+      currentMonth:'',
+      months:'',
       currentTime:null,
       data:[]
     }
+    this.showPicker = this.showPicker.bind(this);
     AsyncStorage.getItem('username').then((username) => {
       if(username){
           this.setState({username: username});
       }
     });
     this.monthArray = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus','September','Oktober','November','Desember'];
+  }
+    
+  componentDidMount() {
+    this.feedData();        
+    this.getCurrentTime();
+  }
+
+  _onRefresh = () => {
+    this.setState({refreshing: true,isError:false});
+    this.feedData().then(() => {
+      this.setState({refreshing: false});
+    });
   }
 
   showPicker = ()=> {
@@ -47,42 +60,34 @@ class RiwayatAbon extends Component {
             selectedYear: year,
             selectedMonth: month,
             
-          })
-          
+          },this.feedData);          
           this.getCurrentTime();
-          this.feedData();
+
         })            
   }
-    
-  componentDidMount() {
-      this.feedData();        
-      this.timer = setInterval(() =>
-      {
-          this.getCurrentTime();
-      }, 1000);
-  }
-
+  
   getCurrentTime = () =>
   {        
-    let month = new Date().getMonth() + 1; //Current Month
+    var currentDate = new Date();
+    let month = ((currentDate.getMonth()+1)>=10)? (currentDate.getMonth()+1) : '0' + (currentDate.getMonth()+1);
     let year = new Date().getFullYear();
+    
     const {selectedMonth} = this.state;
       this.monthArray.map((item, keys) => {
         if (keys == selectedMonth-1) {
           this.setState({ bulan: item  });
         }
       })    
-      this.setState({ currentMonth: year + '-0' + month });    
+      this.setState({ currentMonth: year + '-' + month });
   }
-
-  feedData=()=>{ 
-    this.setState({
-        isLoading:false
-    })     
+  
+  async feedData () {  
     const {selectedYear, selectedMonth} = this.state;   
+    this.state.months=((selectedMonth>=10)? (selectedMonth) : '0' + (selectedMonth));    
+    const token = await AsyncStorage.getItem('username');   
+
     if (selectedYear == null){     
-      console.log(this.state.username); 
-      fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip='+this.state.username+'&date='+this.state.currentMonth,{
+      fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip='+token+'&date='+this.state.currentMonth,{
         method: 'GET',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -91,11 +96,11 @@ class RiwayatAbon extends Component {
       .then((json)=> {
         if (json.status === 'success'){
           this.setState({
-            isLoading: false,
+            isLoading: false, 
             data: json.harian,
-          }, function() {
           });
         } else {
+        
           this.setState({
             isLoading: false,
             refreshing: false,
@@ -103,11 +108,15 @@ class RiwayatAbon extends Component {
         } 
       })
       .catch((error)=>{
-          console.error(error);
+          this.setState({
+            isLoading: false,
+            isError: true
+          })
+          // console.error(error);
       });
     }
     else{
-      fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip='+this.state.username+'&date='+selectedYear+'-0'+selectedMonth,{
+      fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip='+token+'&date='+selectedYear+'-'+this.state.months,{
           method: 'GET',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -116,7 +125,7 @@ class RiwayatAbon extends Component {
       .then((json)=> {
         if (json.status === 'success'){
           this.setState({
-            isLoading: false,
+            isLoading: false, 
             data: json.harian,
           }, function() {
           });
@@ -129,36 +138,20 @@ class RiwayatAbon extends Component {
       })
       .catch((error)=>{
           console.error(error);
+          this.setState({
+            isLoading: false,
+            isError: true
+          })
       });
     }
   }
      
   render(){    
-    const {selectedYear} = this.state;   
-    if (this.state.isLoading) {
-      return (
-        <View style={{flex:1, alignItems:'center',justifyContent:'center'}}>
-          <ActivityIndicator
-            style={styles.indicator}
-            animating={true}
-            size="large"
-          /> 
-        </View>
-        
-      );
-    }
-
-    if (this.state.isError) {
-      return (
-        <ErrorState refresh={this._onRefresh} />
-      );
-    } 
-     
+    const {selectedYear} = this.state;      
     return(
       <SafeAreaView style={{backgroundColor:'#EFEFEF', flex:1}}>
         <View style={styles.wrapperHeader}>
             <Text style={styles.textHeader}>Riwayat Absen</Text>
-            <Text style={{paddingVertical:5, fontSize:15, color:'#2D3137',paddingLeft:5}}>{this.state.currentMonth}</Text>
             <TouchableOpacity onPress={this.showPicker}  style={{
                     flexDirection:'column',
                     alignItems:'center',
@@ -173,70 +166,74 @@ class RiwayatAbon extends Component {
               </View>                
             </TouchableOpacity>   
         </View>
-                                
+       
         <Text style={styles.yearMonthText}>{this.state.bulan} {selectedYear}</Text>
 
-        <View style={styles.wrapper}>                  
-          {                   
+        <View style={styles.wrapper}>        
+        {
+          this.state.isLoading ? 
+          (
+            <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
+              <ActivityIndicator
+                style={styles.indicator}
+                animating={true}
+                size="large"
+              />
+            </View>
+          ) :
+          (
             this.state.data.length == 0 ?
-            (
-              <View>
-                <EmptyState />
-                
-              </View>
-            ) :
-            (
-              <View />
-            )
-          }
-          
-          <FlatList
-            data={this.state.data}
-            refreshControl={<RefreshControl refreshing={this.state.isLoading} onRefresh={this.feedData}/>}
-            keyExtractor={item => item.date}
-            renderItem={({ item }) => (
-              <View style={styles.boxItem}>
-                <View>                
-                  <Text style={{paddingVertical:5, fontSize:16}}>{moment(item.date).format("dddd, DD MMMM YYYY ")}</Text>
-                  <View style={{flexDirection:'row', alignItems:'center'}}>
-                    <Icon name="corner-up-right" size={16} style={{color:'#1095E8'}} />
-                    <Text style={{paddingVertical:5, fontSize:15, color:'#2D3137',paddingLeft:5}}>{item.tap_in} di {item.absen_in_loc}</Text>
-                    
-                  </View>
-                  {
-                      item.valid_in == 2 
-                        ? <Text style={{fontSize:13, color:'red', marginLeft:20}}><Icon name="alert-triangle" size={15} style={{color:'red'}} /> Device Anda tidak sesuai</Text> 
-                        : <View></View>
-                  }
-                  <View style={{flexDirection:'row', alignItems:'center'}}>
-                    <Icon name="corner-up-left" size={16} style={{color:'#FF7A74'}} />                        
-                    {
-                      item.tap_out  === null
-                      ?  <Text style={{fontSize:30, color:'black',paddingLeft:5}}>-</Text>                                   
-                      :  <Text style={{paddingVertical:5, fontSize:15, color:'#2D3137',paddingLeft:5}}>{item.tap_out} di {item.absen_out_loc}</Text>
-                    }
+              <EmptyState />
+            :
+            (          
+            <FlatList
+              data={this.state.data}
+              keyExtractor={item => item.date}
+              renderItem={({ item }) => (
+                <View style={styles.boxItem}>
+                  <View>                
+                    <Text style={{paddingVertical:5, fontSize:16}}>{moment(item.date).format("dddd, DD MMMM YYYY ")}</Text>
+                    <View style={{flexDirection:'row', alignItems:'center'}}>
+                      <Icon name="corner-up-right" size={16} style={{color:'#1095E8'}} />
+                      <Text style={{paddingVertical:5, fontSize:15, color:'#2D3137',paddingLeft:5}}>{item.tap_in} di {item.absen_in_loc}</Text>
+                      
                     </View>
                     {
-                  item.valid_out == 2 ? <Text style={{fontSize:13, color:'red', marginLeft:20}}><Icon name="alert-triangle" size={15} style={{color:'red'}} /> Device Anda tidak sesuai</Text> : <View />
-                }
+                        item.valid_in == 2 
+                          ? <Text style={{fontSize:13, color:'red', marginLeft:20}}><Icon name="alert-triangle" size={15} style={{color:'red'}} /> Device Anda tidak sesuai</Text> 
+                          : <View></View>
+                    }
+                    <View style={{flexDirection:'row', alignItems:'center'}}>
+                      <Icon name="corner-up-left" size={16} style={{color:'#FF7A74'}} />                        
+                      {
+                        item.tap_out  === null
+                        ?  <Text style={{fontSize:30, color:'black',paddingLeft:5}}>-</Text>                                   
+                        :  <Text style={{paddingVertical:5, fontSize:15, color:'#2D3137',paddingLeft:5}}>{item.tap_out} di {item.absen_out_loc}</Text>
+                      }
+                      </View>
+                      {
+                    item.valid_out == 2 ? <Text style={{fontSize:13, color:'red', marginLeft:20}}><Icon name="alert-triangle" size={15} style={{color:'red'}} /> Device Anda tidak sesuai</Text> : <View />
+                  }
+                  </View>
+                  
+                  <View style={{flexDirection:'row', alignItems:'center'}}>
+                      {
+                        item.duration  === null
+                        ?  <View style={{flexDirection:'row', alignItems:'center',fontWeight:'bold'}}>
+                              <Text style={{fontSize:35, color:'#1095E8',paddingLeft:5, fontWeight:'bold'}}>-</Text> 
+                              <Text style={{fontSize:18}}> Jam</Text> 
+                            </View>                                       
+                        :  <View style={{flexDirection:'row', alignItems:'center'}}>
+                                  <Text style={{fontSize:35, color:'#1095E8',fontWeight:'bold' }}>{item.duration}</Text>    
+                                  <Text style={{fontSize:18}}> Jam</Text>
+                            </View>                
+                      }                       
+                  </View>                      
                 </View>
-                
-                <View style={{flexDirection:'row', alignItems:'center'}}>
-                    {
-                      item.duration  === null
-                      ?  <View style={{flexDirection:'row', alignItems:'center',fontWeight:'bold'}}>
-                            <Text style={{fontSize:35, color:'#1095E8',paddingLeft:5, fontWeight:'bold'}}>-</Text> 
-                            <Text style={{fontSize:18}}> Jam</Text> 
-                          </View>                                       
-                      :  <View style={{flexDirection:'row', alignItems:'center'}}>
-                                <Text style={{fontSize:35, color:'#1095E8',fontWeight:'bold' }}>{item.duration}</Text>    
-                                <Text style={{fontSize:18}}> Jam</Text>
-                          </View>                
-                    }                       
-                </View>                      
-              </View>
-            )}               
-          />                
+              )}               
+            />)
+          )
+        }             
         </View>
         
         <YearMonthPicker

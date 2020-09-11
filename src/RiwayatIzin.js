@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import {
-    View,Dimensions,
+    View,Dimensions,RefreshControl,
     Text,FlatList,ActivityIndicator,
     StyleSheet, TouchableOpacity
 } from "react-native";
@@ -19,23 +19,18 @@ class RiwayatIzin extends Component {
   constructor(props){
       super(props);
       this.state={
-        username:'uname',
+        username:'',
         isError: false,
         refreshing: false,
         isLoading: true,
         startYear: 2020,
         endYear: 2050,
         bulan:null,
+        months:'',
+        currentMonth:'2020-09',
         data:[]
       }
 
-      AsyncStorage.getItem('username', (error, result) => {
-        if (result) {
-            this.setState({
-              username: result
-            });
-        }
-      });
       this.monthArray = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus','September','Oktober','November','Desember'];
     }
 
@@ -49,7 +44,7 @@ class RiwayatIzin extends Component {
               selectedMonth: month,
               
             })
-            
+           
             this.getCurrentTime();
             this.feedDataBulan();
           })            
@@ -62,11 +57,17 @@ class RiwayatIzin extends Component {
           if (keys == selectedMonth-1) {
             this.setState({ bulan: item  });
           }
-        })            
+        })   
+        var currentDate = new Date();
+        let month = ((currentDate.getMonth()+1)>=10)? (currentDate.getMonth()+1) : '0' + (currentDate.getMonth()+1);
+        let year = new Date().getFullYear();      
+    
+        this.setState({ currentMonth: year + '-' + month });      
     }
 
     componentDidMount() {
       this.feedData();
+       this.getCurrentTime();
     }
      
     _onRefresh = () => {
@@ -80,8 +81,9 @@ class RiwayatIzin extends Component {
     }
 
     //Semua Izin
-    feedData = async () => {
-      return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin_pegawai?nip='+this.state.username,{
+    async feedData () {       
+      const token = await AsyncStorage.getItem('username');   
+      return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin_pegawai?nip='+token,{
         method: 'GET',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -89,7 +91,7 @@ class RiwayatIzin extends Component {
       })
       .then((response) => response.json())
       .then((responseJson) => {
-        console.log(responseJson);
+        //console.log(responseJson);
         if (responseJson.status === 'success'){
           this.setState({
             isLoading: false,
@@ -101,7 +103,7 @@ class RiwayatIzin extends Component {
             isLoading: false,
             refreshing: false,
           })
-        }  console.log(this.setState.perbulan);
+        } // console.log(this.setState.perbulan);
       })
       
       .catch((error) => {
@@ -115,41 +117,76 @@ class RiwayatIzin extends Component {
     //Per Bulan
     feedDataBulan = async () => {
       const {selectedYear, selectedMonth} = this.state;        
-    
-      console.log(this.state.bulan);
-      return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin_pegawai?nip='+this.state.username+'&date='+selectedYear+'-0'+selectedMonth,{
+      this.state.months=((selectedMonth>=10)? (selectedMonth) : '0' + (selectedMonth));      
+      const token = await AsyncStorage.getItem('username');   
+      if (selectedYear == null){     
+        return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin_pegawai?nip='+token+'&date='+this.state.currentMonth,{
+        
         method: 'GET',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }          
-      })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        console.log(responseJson);
-        if (responseJson.status === 'success'){
-          this.setState({
-            isLoading: false,
-            data: responseJson.harian,
-          }, function() {
-          });
-        } else {
-          this.setState({
-            isLoading: false,
-            refreshing: false,
-          })
-        }  
-      })
-      
-      .catch((error) => {
-        this.setState({
-          isLoading: false,
-          isError: true
         })
-      });
+        .then((response) => response.json())
+        .then((responseJson) => {
+          //console.log(responseJson);
+          if (responseJson.status === 'success'){
+            this.setState({
+              isLoading: false,
+              data: responseJson.harian,
+            }, function() {
+            });
+          } else {
+            this.setState({
+              isLoading: false,
+              refreshing: false,
+            })
+          }  
+        })
+        
+        .catch((error) => {
+          this.setState({
+            isLoading: false,
+            isError: true
+          })
+        });
+      }
+      else {      
+        return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin_pegawai?nip='+token+'&date='+selectedYear+'-'+this.state.months,{
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }          
+        })
+        .then((response) => response.json())
+        .then((responseJson) => {
+          //console.log(responseJson);
+          if (responseJson.status === 'success'){
+            this.setState({
+              isLoading: false,
+              data: responseJson.harian,
+            }, function() {
+            });
+          } else {
+            this.setState({
+              isLoading: false,
+              refreshing: false,
+            })
+          }  
+        })
+        
+        .catch((error) => {
+          this.setState({
+            isLoading: false,
+            isError: true
+          })
+        });
+      }
     }
 
   render(){
     const {selectedYear} = this.state;
+    
     if (this.state.isLoading) {
       return (
         <View style={{flex:1, alignItems:'center',justifyContent:'center'}}>
@@ -158,8 +195,7 @@ class RiwayatIzin extends Component {
             animating={true}
             size="large"
           /> 
-        </View>
-        
+        </View>        
       );
     }
 
@@ -167,8 +203,7 @@ class RiwayatIzin extends Component {
       return (
         <ErrorState refresh={this._onRefresh} />
       );
-    } 
-    
+    }
     return(
       <View style={styles.container}>
         <View style={{flexDirection:'row', marginTop:10,marginVertical:5,marginHorizontal:5,
@@ -199,22 +234,31 @@ class RiwayatIzin extends Component {
                         borderRadius: 2,                  
                         justifyContent:'center'}}>
                     <Text style={{color: '#00AEEF',marginHorizontal:5,marginVertical:5,fontWeight:'bold',fontSize:16}}>Per Bulan</Text>
-                </View>                
-              </TouchableOpacity>
+                </View>     
+                           
+              </TouchableOpacity>     
+            
               <Text style={styles.yearMonthText}>{this.state.bulan} {selectedYear}</Text>                      
-            </View>            
+            </View>     
         </View>         
-
+       
             {/* list riwayat */}
-        <View style={styles.wrapper}>        
+        <View style={styles.wrapper}>
+            
           {
             this.state.data.length == 0 ?
             (
-              <View>
+              <View >           
                 <EmptyState />
               </View>
             ) :                
             <FlatList
+              refreshControl={
+                  <RefreshControl
+                    refreshing={this.state.refreshing}
+                    onRefresh={this._onRefresh}
+                  />
+            }
                 data={this.state.data}
                 keyExtractor={item => item.tanggal}
                 renderItem={({ item }) => (

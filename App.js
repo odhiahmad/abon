@@ -13,7 +13,7 @@ import AmbilAbsen from './src/AmbilAbsen'
 import AjukanIzin from './src/AjukanIzin'
 import RiwayatIzin from './src/RiwayatIzin'
 
-import SuccessAbsen from './src/components/SuccessAbsen'
+import SuccessAbsen from './src/SuccessAbsen'
 
 import Icon from 'react-native-vector-icons/Feather';
 import IconB from 'react-native-vector-icons/FontAwesome5';
@@ -43,11 +43,12 @@ const StackHome=()=>(
      headerShown:true,
      }}
    />
-    <Stack.Screen name="SuccessAbsen" component={SuccessAbsen}
-       options={{ 
-        headerShown:false,
-        }}
-   />
+  <Stack.Screen name="SuccessAbsen" component={SuccessAbsen}
+      options={{ 
+      headerShown:false,
+      }}
+  />
+ 
 </Stack.Navigator>
 )
 const StackAgenda=()=>(

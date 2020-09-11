@@ -5,8 +5,6 @@ import {
   StyleSheet, TouchableOpacity
 } from "react-native";
 
-import { StackActions, NavigationActions } from 'react-navigation';
-
 class SuccessAbsen extends Component {
   static navigationOptions = {
     header: null
@@ -20,12 +18,8 @@ class SuccessAbsen extends Component {
     }
   }
 
-  reset = () => {
-    const resetAction = StackActions.reset({
-      index: 0,
-      actions: [NavigationActions.navigate({ routeName: 'HomeScreen'})],
-    });
-    this.props.navigation.dispatch(resetAction);
+  reset = () => {  
+    this.props.navigation.navigate('Home');
   }
 
   render() {

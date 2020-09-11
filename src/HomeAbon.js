@@ -139,9 +139,10 @@ class HomeAbon extends Component {
       })        
   }
  
-  async feedData () {
+  async feedData () {    
     
-    return fetch('http://abon.sumbarprov.go.id/rest_abon/api/biodata_pegawai?nip='+this.state.username, { 
+    const token = await AsyncStorage.getItem('username');   
+    return fetch('http://abon.sumbarprov.go.id/rest_abon/api/biodata_pegawai?nip='+token, { 
       method: 'GET',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -246,7 +247,7 @@ class HomeAbon extends Component {
                   }}>
                     <View style={{alignItems:'center', paddingHorizontal:10}}>
                     {
-                          this.state.tap_in === '' 
+                          this.state.tap_in === null
                             ? <Icon name={'fingerprint'} size={41} style={{color:'#74C6F4', textAlign:'center'}} />
                             : <Text style={{fontSize:30}}>{this.state.tap_in}</Text>
                         }
@@ -259,7 +260,7 @@ class HomeAbon extends Component {
                   }}>
                     <View style={{alignItems:'center', paddingHorizontal:10}}>
                     {
-                          this.state.tap_out === '' 
+                          this.state.tap_out === null 
                             ?  <Icon name={'fingerprint'} size={41} style={{color:'#74C6F4', textAlign:'center'}} />                                  
                             : <Text style={{fontSize:30}}>{this.state.tap_out}</Text>
                         }

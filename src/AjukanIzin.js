@@ -484,7 +484,7 @@ class AjukanIzin extends Component {
                     onDownArrow={() => {
                     this.inputRefs.jenisIzin.togglePicker();
                     }}
-                    style={pickerSelectStyles}
+                    style={styles.inputIOS}
                     value={this.state.jenisIzin}
                     ref={el => {
                     this.inputRefs.jenisIzin = el;

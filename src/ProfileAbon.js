@@ -5,6 +5,7 @@ import {
     StyleSheet, TouchableOpacity
 } from "react-native";
 
+import ErrorState from './components/ErrorState';
 import { LinearGradient } from 'expo-linear-gradient';
 import ProgressCircle from 'react-native-progress-circle'
 import AsyncStorage from '@react-native-community/async-storage';
@@ -17,104 +18,99 @@ class ProfileAbon extends Component {
     header: null
 }
 
-constructor(props) {
-  super(props)
-  this.state={
-    nama_asn: 'Nama ASN',
-    username: '',
-    jabatan: 'Jabatan',
-    isError: false,
-    refreshing: false,
-    isLoading: true, 
-    average:'',
-    average_color:'',
-    average_percent:'0',
-    jumlah_telat:'',
-    jam_telat:'',
-    pulang_cepat:'',
-    durasi:[],
-    pulang_cepat:''
+  constructor(props) {
+    super(props)
+    this.state={
+      nama_asn: 'Nama ASN',
+      username: '',
+      jabatan: 'Jabatan',
+      isError: false,
+      refreshing: false,
+      isLoading: true,
+      average:'',
+      average_color:'',
+      jumlah_telat:'',
+      jam_telat:'',
+      average_percent:'',
+      pulang_cepat:'',
+      durasi:[],
+      pulang_cepat:''
+  }
+    AsyncStorage.getItem('nama_asn').then((nama_asn) => {
+      if(nama_asn){
+          this.setState({nama_asn: nama_asn});
+      }
+    });
+    AsyncStorage.getItem('username').then((username) => {
+      if(username){
+          this.setState({username: username});
+      }
+    });
+    AsyncStorage.getItem('jabatan').then((jabatan) => {
+      if(jabatan){
+          this.setState({jabatan: jabatan});
+      }
+    });
   }
 
-  AsyncStorage.getItem('nama_asn').then((nama_asn) => {
-    if(nama_asn){
-        this.setState({nama_asn: nama_asn});
-    }
-  });
-  AsyncStorage.getItem('username').then((username) => {
-    if(username){
-        this.setState({username: username});
-    }
-  });
-  AsyncStorage.getItem('jabatan').then((jabatan) => {
-    if(jabatan){
-        this.setState({jabatan: jabatan});
-    }
-  });
-}
+  componentDidMount() {
+    this.feedData();   
+  }
 
-componentDidMount() {
-  this.feedData();
-}
+  _onRefresh = () => {
+    this.setState({refreshing: true,isError:false});
+    this.feedData().then(() => {
+      this.setState({refreshing: false});
+    });
+  }
 
-_onRefresh = () => {
-  this.setState({refreshing: true,isError:false});
-  this.feedData().then(() => {
-    this.setState({refreshing: false});
-  });
-}
-
-feedData=()=>{
-  this.setState({
-      isLoading:false
-  }) 
-  return fetch('http://abon.sumbarprov.go.id/rest_abon/api/biodata_pegawai?nip='+this.state.username,{
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-  })
-  .then((response) => response.json())
-  .then((responseJson) => {
-    if (responseJson.status === 'success'){
-      this.setState({
-        isLoading: false,
-          durasi : responseJson.durasi,
-          average_color: responseJson.durasi[0].average_color,
-          average_percent: responseJson.durasi[0].average_percent,        
-          average: responseJson.durasi[0].average,      
-          jumlah_telat: responseJson.rekap[0].jumlah_telat,      
-          jam_telat: responseJson.rekap[0].jam_telat,      
-          pulang_cepat: responseJson.rekap[0].pulang_cepat
-      }, function() {
-        // do something with new state
-      });
-    } else {
-      alert('Sesi anda telah habis, silahkan Logout dan Login kembali')
-      this.setState({
-        isLoading: false,
-        refreshing: false,
-      })
-    }
-  })
-  .catch((error) => {
-    // console.error(error);
-    this.setState({
-      isLoading: false,
-      isError: true
+  async feedData () {  
+    const token = await AsyncStorage.getItem('username');
+    return fetch('http://abon.sumbarprov.go.id/rest_abon/api/biodata_pegawai?nip='+token,{
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
     })
-  });
-}
+    .then((response) => response.json())
+    .then((responseJson) => {
+      if (responseJson.status === 'success'){
+        this.setState({
+            durasi : responseJson.durasi,
+            average_color: responseJson.durasi[0].average_color,
+            average_percent: responseJson.durasi[0].average_percent,        
+            average: responseJson.durasi[0].average,      
+            jumlah_telat: responseJson.rekap[0].jumlah_telat,      
+            jam_telat: responseJson.rekap[0].jam_telat,      
+            pulang_cepat: responseJson.rekap[0].pulang_cepat
+        });
+      } else {
+        alert('Sesi anda telah habis, silahkan Logout dan Login kembali')
+        this.setState({
+          isLoading: false,
+          refreshing: false,
+        })
+      }
+    })
+    .catch((error) => {
+      // console.error(error);
+      this.setState({
+        isLoading: false,
+        isError: true
+      })
+    });
+  }
 
-render() {
-    return (      
+  render() {
+    return (            
       <View style={styles.container}>
-        <ScrollView refreshControl={
-          <RefreshControl
-            refreshing={this.state.refreshing}
-            onRefresh={this._onRefresh}
-          />
-        }>
+        <ScrollView 
+          refreshControl={
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={this._onRefresh}
+                />
+          }>
           <LinearGradient
             colors={['#00DDFA', '#00B9F2']} style={styles.headerBanner}>
           </LinearGradient>
@@ -168,56 +164,55 @@ render() {
         </View>
       </View>
     );
-}
+  }
 }
 export default ProfileAbon;
-
 const styles = StyleSheet.create({
-container: {
-    flex: 1,
-},
-headerBanner: {
-    height: 170,
-    width: '100%',
-    borderBottomLeftRadius: 90,
-    borderBottomRightRadius:90,
-},
-wrapper: {
-  paddingHorizontal: 20
-},
-boxHeader: {
-  elevation: 1,
-  backgroundColor: '#fff',
-  shadowOffset:{  width: 2,  height: 2,  },
-  shadowColor: '#e0e0e0',
-  shadowOpacity: 1.0,
-  paddingHorizontal: 10,
-  paddingVertical: 10,
-  marginTop: -60,
-  borderRadius: 10,
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent:'center'
-},
-boxProgress: {
-  elevation: 1,
-  backgroundColor: '#fff',
-  shadowOffset:{  width: 2,  height: 2,  },
-  shadowColor: '#e0e0e0',
-  shadowOpacity: 1.0,
-  paddingHorizontal: 10,
-  paddingVertical: 20,
-  marginTop: 15,
-  borderRadius: 10,
-  alignItems: 'center',
-  borderWidth: 1,
-  borderColor:'#e0e0e0'
-},
-floatButton :{
-  borderRadius: 30,
-  backgroundColor: '#ee6e73',
-  position: 'absolute',
-  bottom: 10,
-  alignItems:'center'
-}
+  container: {
+      flex: 1,
+  },
+  headerBanner: {
+      height: 170,
+      width: '100%',
+      borderBottomLeftRadius: 90,
+      borderBottomRightRadius:90,
+  },
+  wrapper: {
+    paddingHorizontal: 20
+  },
+  boxHeader: {
+    elevation: 1,
+    backgroundColor: '#fff',
+    shadowOffset:{  width: 2,  height: 2,  },
+    shadowColor: '#e0e0e0',
+    shadowOpacity: 1.0,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    marginTop: -60,
+    borderRadius: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent:'center'
+  },
+  boxProgress: {
+    elevation: 1,
+    backgroundColor: '#fff',
+    shadowOffset:{  width: 2,  height: 2,  },
+    shadowColor: '#e0e0e0',
+    shadowOpacity: 1.0,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
+    marginTop: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor:'#e0e0e0'
+  },
+  floatButton :{
+    borderRadius: 30,
+    backgroundColor: '#ee6e73',
+    position: 'absolute',
+    bottom: 10,
+    alignItems:'center'
+  }
 });

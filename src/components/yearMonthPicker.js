@@ -72,10 +72,11 @@ export default class YearMonthPicker extends Component {
 
     getMonths = () => {
         let months = []
+        
         for (let i = 1; i <= 12; i++) {
             months.push(i);
         }
-        return months;
+        return months ;
     }
 
     renderPickerItems = (data) => {
