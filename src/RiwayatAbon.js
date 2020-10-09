@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import YearMonthPicker from './components/yearMonthPicker';
 import IconB from 'react-native-vector-icons/FontAwesome';
 import EmptyState from './components/EmptyState';
+import { _baseURL_ } from "../constant";
 
 class RiwayatAbon extends Component {
   constructor(props){
@@ -87,7 +88,7 @@ class RiwayatAbon extends Component {
     const token = await AsyncStorage.getItem('username');   
 
     if (selectedYear == null){     
-      fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip='+token+'&date='+this.state.currentMonth,{
+      fetch(_baseURL_+'list_absensi_past_month?nip='+token+'&date='+this.state.currentMonth,{
         method: 'GET',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -116,7 +117,7 @@ class RiwayatAbon extends Component {
       });
     }
     else{
-      fetch('http://abon.sumbarprov.go.id/rest_abon/api/list_absensi_past_month?nip='+token+'&date='+selectedYear+'-'+this.state.months,{
+      fetch(_baseURL_+'list_absensi_past_month?nip='+token+'&date='+selectedYear+'-'+this.state.months,{
           method: 'GET',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -256,7 +257,7 @@ const styles= StyleSheet.create({
   },
   wrapper : {
     paddingHorizontal: 20,
-    marginBottom:70
+    marginBottom:110
   },
   textHeader: {
     fontSize:25,

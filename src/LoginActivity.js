@@ -7,6 +7,7 @@ import {
 import * as Device from 'expo-device';
 // import AsyncStorage from '@react-native-community/async-storage';
 import Loader from './components/loader';
+import { _baseURL_ } from "../constant";
 
 class LoginActivity extends Component {
 
@@ -71,7 +72,7 @@ class LoginActivity extends Component {
       }
       formBody = formBody.join('&');  
 
-      return fetch('http://abon.sumbarprov.go.id/rest_abon/api/login',{
+      return fetch(_baseURL_+'login',{
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -94,6 +95,12 @@ class LoginActivity extends Component {
           AsyncStorage.setItem('eselon', json.result[0].eselon);                 
           AsyncStorage.setItem('pangkat', json.result[0].pangkat);                 
           AsyncStorage.setItem('jenjang', json.result[0].jenjang);   
+                         
+          AsyncStorage.setItem('store_device_id',this.state.device_id);            
+          AsyncStorage.setItem('device_model', this.state.device_name);            
+          AsyncStorage.setItem('device_device', this.state.device_device);            
+          AsyncStorage.setItem('device_hardware', this.state.device_hardware);  
+
           this.props.navigation.navigate('Home');
          
           this.setState({

@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import EmptyState from './components/EmptyState';
 import ErrorState from './components/ErrorState';
 import YearMonthPicker from './components/yearMonthPicker';
-
+import { _baseURL_ } from "../constant";
 
 class RiwayatIzin extends Component {
   constructor(props){
@@ -83,7 +83,7 @@ class RiwayatIzin extends Component {
     //Semua Izin
     async feedData () {       
       const token = await AsyncStorage.getItem('username');   
-      return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin_pegawai?nip='+token,{
+      return fetch(_baseURL_+'izin_pegawai?nip='+token,{
         method: 'GET',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -120,7 +120,7 @@ class RiwayatIzin extends Component {
       this.state.months=((selectedMonth>=10)? (selectedMonth) : '0' + (selectedMonth));      
       const token = await AsyncStorage.getItem('username');   
       if (selectedYear == null){     
-        return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin_pegawai?nip='+token+'&date='+this.state.currentMonth,{
+        return fetch(_baseURL_+'izin_pegawai?nip='+token+'&date='+this.state.currentMonth,{
         
         method: 'GET',
         headers: {
@@ -152,7 +152,7 @@ class RiwayatIzin extends Component {
         });
       }
       else {      
-        return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin_pegawai?nip='+token+'&date='+selectedYear+'-'+this.state.months,{
+        return fetch(_baseURL_+'izin_pegawai?nip='+token+'&date='+selectedYear+'-'+this.state.months,{
           method: 'GET',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'

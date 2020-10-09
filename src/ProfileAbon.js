@@ -10,6 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import ProgressCircle from 'react-native-progress-circle'
 import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/AntDesign';
+import { _baseURL_ } from "../constant";
 
 export const onSignOut = () =>  AsyncStorage.clear();
 
@@ -66,7 +67,7 @@ class ProfileAbon extends Component {
 
   async feedData () {  
     const token = await AsyncStorage.getItem('username');
-    return fetch('http://abon.sumbarprov.go.id/rest_abon/api/biodata_pegawai?nip='+token,{
+    return fetch(_baseURL_+'biodata_pegawai?nip='+token,{
       method: 'GET',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'

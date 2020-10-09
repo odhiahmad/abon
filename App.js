@@ -1,4 +1,3 @@
-import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -14,6 +13,7 @@ import AjukanIzin from './src/AjukanIzin'
 import RiwayatIzin from './src/RiwayatIzin'
 
 import SuccessAbsen from './src/SuccessAbsen'
+import TakePhoto from './src/TakePhoto'
 
 import Icon from 'react-native-vector-icons/Feather';
 import IconB from 'react-native-vector-icons/FontAwesome5';
@@ -44,6 +44,11 @@ const StackHome=()=>(
      }}
    />
   <Stack.Screen name="SuccessAbsen" component={SuccessAbsen}
+      options={{ 
+      headerShown:false,
+      }}
+  />
+   <Stack.Screen name="TakePhoto" component={TakePhoto}
       options={{ 
       headerShown:false,
       }}

@@ -1,15 +1,13 @@
 import React, { Component } from "react";
-import {
-    View,
-    Text,Alert,
-    StyleSheet,TouchableOpacity,ActivityIndicator
-} from "react-native";
+import {View,Text,StyleSheet,TouchableOpacity,
+        Alert,ActivityIndicator} from "react-native";
 import * as Location from 'expo-location';
 import * as Permissions from 'expo-permissions';
-import { StackActions, NavigationActions } from 'react-navigation';
+import { StackActions } from '@react-navigation/native';
 import AsyncStorage from '@react-native-community/async-storage';
-import Icon from 'react-native-vector-icons/FontAwesome5';
 import IconB from 'react-native-vector-icons/MaterialIcons';
+import * as DocumentPicker from 'expo-document-picker';
+import * as Device from 'expo-device';
 
 class AmbilAbsen extends Component {
   constructor (props) {
@@ -20,14 +18,16 @@ class AmbilAbsen extends Component {
       isLoading: true,
       showAlert: false,
       opd:'',
+      uri: '',
       username:'',
+      absen_type:this.props.route.params.absen_type,
       locationStatus: null,
       distance_max: null,
       value:null,
       id_koordinat:null,
       qrcode:null
-
     }
+    
     AsyncStorage.getItem('opd', (error, result) => {
         if (result) {
             this.setState({
@@ -35,13 +35,13 @@ class AmbilAbsen extends Component {
             });
         }
       });
-      AsyncStorage.getItem('username', (error, result) => {
-        if (result) {
-            this.setState({
-                username: result
-            });
-        }
-      });
+    AsyncStorage.getItem('username', (error, result) => {
+      if (result) {
+          this.setState({
+              username: result
+          });
+      }
+    });
   }
     
   componentDidMount() {
@@ -60,30 +60,114 @@ class AmbilAbsen extends Component {
     });
   };
 
+  alerSelectDialog = () =>{ 
+    
+    const {navigate} = this.props.navigation;
+    Alert.alert(
+      'Aksi',
+      'Pilih aksi dalam mengambil absen',
+      [
+        {text: 'Pilih Dokumen',  onPress: this._pickDocument},
+        {text: 'Foto Selfie',  onPress: () => navigate("TakePhoto",{absen_type: this.state.absen_type, lat: this.state.lat, long: this.state.long})},
+      ]   
+    )   
+  }
+
+  _pickDocument = async () => {    
+    const token = await AsyncStorage.getItem('username');   
+    let result = await DocumentPicker.getDocumentAsync({});
+    if(result.type !== 'cancel') {
+      this.setState  ({loading : true})
+      let filename;
+      let type;
+
+      filename = result.name;
+      type = result.name.split('.').reverse()[0];
+      
+      let details = {
+        nip: token,
+        image_tag: '-',
+        image_data:'-',
+        lattitude: this.state.lat,
+        longitude: this.state.long,
+        store_device_id:Expo.Constants.deviceId,
+        device_model:Device.modelName,
+        device_device: Device.brand,
+        device_hardware:Device.manufacturer
+      };
+      let formBody = [];
+
+      for (let property in details) {
+        let encodedKey = encodeURIComponent(property);
+        let encodedValue = encodeURIComponent(details[property]);
+        formBody.push(encodedKey + "=" + encodedValue);
+      }
+      formBody = formBody.join('&');  
+      // -------------
+
+      this.setState({
+        isLoading: true
+      })
+
+      const url='http://abon.sumbarprov.go.id/rest_abon/api/tap_in_out_outdor'
+      fetch(url, {
+        method: 'POST',
+        headers: {                
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }, body: formBody
+      })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        console.log(responseJson);
+        this.setState({
+          isLoading: false
+        })
+        this.reset(responseJson.time, responseJson.date);
+      })
+      .catch((error) => {
+        console.error(error);
+        alert('Anda sedang tidak terhubung ke jaringan internet')
+      });
+    }else{
+      
+    }
+    console.log(result);
+  }
+
+  //Absen Masuk
   tap_absen_in = async () => {
     this.setState({
       isLoading: true
     })
+
+    const device_id = await AsyncStorage.getItem('store_device_id');
+    const device_model = await AsyncStorage.getItem('device_model');
+    const device_device = await AsyncStorage.getItem('device_device');
+    const device_hardware = await AsyncStorage.getItem('device_hardware');
     let location = await Location.getCurrentPositionAsync({});
+
     let details = {
       nip: this.state.username,
       id_koordinat: this.state.id_koordinat,
       lattitude: location.coords.latitude,
       longitude: location.coords.longitude,
-      store_device_id: '-',
-      device_model: '-',
-      device_device: '-',
-      device_hardware: '-',
+      store_device_id: device_id,
+      device_model: device_model,
+      device_device: device_device,
+      device_hardware: device_hardware,
       metode: this.state.qrcode
     };
+
     let formBody = [];
     for (let property in details) {
       let encodedKey = encodeURIComponent(property);
       let encodedValue = encodeURIComponent(details[property]);
       formBody.push(encodedKey + "=" + encodedValue);
     }
+
     formBody = formBody.join('&');  
     fetch('http://abon.sumbarprov.go.id/rest_abon/api/cek_metode', {
+      method: 'POST',
       headers: {                
         'Content-Type': 'application/x-www-form-urlencoded'
       }, body: formBody
@@ -98,37 +182,58 @@ class AmbilAbsen extends Component {
     });
   }  
 
+  //Absen Keluar
   tap_absen_out = async () => {
     this.setState({
       isLoading: true
-    })
-     let location = await Location.getCurrentPositionAsync({});
+    })    
+
+    const device_id = await AsyncStorage.getItem('store_device_id');
+    const device_model = await AsyncStorage.getItem('device_model');
+    const device_device = await AsyncStorage.getItem('device_device');
+    const device_hardware = await AsyncStorage.getItem('device_hardware');
+    let location = await Location.getCurrentPositionAsync({});
+
     let details = {
       nip: this.state.username,
       id_koordinat: this.state.id_koordinat,
       lattitude: location.coords.latitude,
       longitude: location.coords.longitude,
-      store_device_id: '-',
-      device_model: '-',
-      device_device: '-',
-      device_hardware: '-',
+      store_device_id: device_id,
+      device_model: device_model,
+      device_device: device_device,
+      device_hardware: device_hardware,
       metode: this.state.qrcode
     };
+    console.log("longtu "+ location.coords.longitude);
+    console.log("latitude "+ location.coords.latitude);
+
     let formBody = [];
     for (let property in details) {
       let encodedKey = encodeURIComponent(property);
       let encodedValue = encodeURIComponent(details[property]);
       formBody.push(encodedKey + "=" + encodedValue);
     }
+
     formBody = formBody.join('&');  
-    fetch('http://abon.sumbarprov.go.id/rest_abon/api/cek_metode', {
+    this.setState({
+      isLoading: true
+    })
+  
+    const url='http://abon.sumbarprov.go.id/rest_abon/api/cek_metode'
+    fetch(url, {
+      method: 'POST',
       headers: {                
         'Content-Type': 'application/x-www-form-urlencoded'
       }, body: formBody
     })
     .then((response) => response.json())
     .then((responseJson) => {
-      this.reset(responseJson.time, responseJson.date, responseJson.catatan);
+      console.log(responseJson);
+      this.setState({
+        isLoading: false
+      })
+      this.reset(responseJson.time, responseJson.date);
     })
     .catch((error) => {
       console.error(error);
@@ -136,11 +241,13 @@ class AmbilAbsen extends Component {
     });
   }  
 
+  //Get Lokasi
   _getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     this.setState({
       locationStatus: status
     })
+
     if (status !== 'granted') {
       this.setState({
         locationResult: 'Permission to access location was denied',
@@ -154,17 +261,19 @@ class AmbilAbsen extends Component {
         lat: location.coords.latitude,
         long: location.coords.longitude
       };
-        console.log("uname "+this.state.username);
-        console.log("opd "+ this.state.opd);
-        
-        console.log("lat " +location.coords.latitude);
-        console.log("long "+location.coords.longitude);
+
+      // console.log("uname "+this.state.username);
+      // console.log("opd "+ this.state.opd);      
+      // console.log("lat " +location.coords.latitude);
+      // console.log("long "+location.coords.longitude);
       let formBody = [];
+
       for (let property in details) {
         let encodedKey = encodeURIComponent(property);
         let encodedValue = encodeURIComponent(details[property]);
         formBody.push(encodedKey + "=" + encodedValue);
       }
+
       formBody = formBody.join('&');  
         fetch('http://abon.sumbarprov.go.id/rest_abon/api/cek_distance', {
           method: 'POST',
@@ -185,10 +294,10 @@ class AmbilAbsen extends Component {
               id_koordinat: responseJson.data[0].id_koordinat,
               value: responseJson.data[0].value
           })
-          console.log("distance "+this.state.distance);
-        console.log("value "+ this.state.value);
-        console.log("qrcode "+this.state.qrcode);
-        console.log("id_koordinat "+ this.state.id_koordinat);
+        // console.log("distance "+this.state.distance);
+        // console.log("value "+ this.state.value);
+        // console.log("qrcode "+this.state.qrcode);
+        // console.log("id_koordinat "+ this.state.id_koordinat);
           } else {
           }
         })
@@ -206,14 +315,11 @@ class AmbilAbsen extends Component {
   };
 
   reset(time,date){
-    
-    this.props.navigation.navigate('SuccessAbsen', { jam:time , tanggal:date });
-    this.props.navigation.dispatch(resetAction);
+    this.props.navigation.dispatch(
+      StackActions.replace('SuccessAbsen', {jam: time, tanggal:date}));
   }
-    
+  
   render(){
-    const {navigate} = this.props.navigation;
-
     if (this.state.locationStatus !== 'granted') {
       return (
         <View style={{flex:1, alignItems:'center', justifyContent:'center',paddingHorizontal:20}}>
@@ -240,7 +346,7 @@ class AmbilAbsen extends Component {
         <View style={{paddingHorizontal: 20}}>
           <View style={styles.boxItemBlue}>
             <Text style={styles.textBold}>Absen di Kantor</Text>
-            <Text style={{fontWeight:'200',color:'#fff', fontSize:16}}>(Pastikan anda berada di dalam lingkungan kantor)</Text>
+            <Text style={{fontWeight:'200',color:'#fff', fontSize:15}}>(Pastikan anda berada di dalam lingkungan kantor)</Text>
             <View>
               {
                 this.state.value == '0' ? (
@@ -251,7 +357,7 @@ class AmbilAbsen extends Component {
                         borderWidth: 1,
                         borderColor: '#fff',
                         borderRadius: 5,
-                        marginTop: 15,
+                        marginTop: 20,
                         padding: 10,
                         alignItems:'center',
                         flexDirection: 'row',
@@ -269,13 +375,13 @@ class AmbilAbsen extends Component {
                       borderWidth: 1,
                       borderColor: '#fff',
                       borderRadius: 5,
-                      marginTop: 15,
+                      marginTop: 20,
                       padding: 10,
                       alignItems:'center',
                       flexDirection:'row',
                       justifyContent:'center'
                     }}>
-                      <Icon name="fingerprint" size={20} style={{color:'#fff'}} />
+                      <IconB name="check-box" size={20} style={{color:'#fff'}} />
                       <Text style={{color:'#fff', fontSize:15}}> Ambil Absen {this.state.absen_type === 1 ? 'Masuk' : 'Keluar'}</Text>
                     </View>
                   </TouchableOpacity>
@@ -283,9 +389,10 @@ class AmbilAbsen extends Component {
               }
             </View>
           </View>
-            <TouchableOpacity onPress={() => navigate("TakePhoto",{absen_type: this.state.absen_type, lat: this.state.lat, long: this.state.long})} style={styles.boxItemRed}>
+          {/* navigate("TakePhoto",{absen_type: this.state.absen_type, lat: this.state.lat, long: this.state.long}) */}
+            <TouchableOpacity onPress={this.alerSelectDialog} style={styles.boxItemRed}>
               <Text style={styles.textBold}>Absen di Luar Kantor</Text>
-              <Text style={{fontWeight:'200',color:'#fff', fontSize:16}}>(Absen di luar kantor dengan mengupload bukti foto selfie atau dokumen pendukung)</Text>
+              <Text style={{fontWeight:'200',color:'#fff', fontSize:15}}>(Absen di luar kantor dengan mengupload bukti foto selfie atau dokumen pendukung)</Text>
             </TouchableOpacity>
         </View>                   
       </View>

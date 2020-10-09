@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome5';
 import ErrorState from "./components/ErrorState";
 import moment from 'moment';
+import { _baseURL_ } from "../constant";
 var g = null; 
 var m = moment();
 
@@ -49,6 +50,7 @@ class HomeAbon extends Component {
       isError: false,
       refreshing: false,
     }
+  
     AsyncStorage.getItem('nama_asn', (error, result) => {
       if (result) {
           this.setState({
@@ -142,7 +144,7 @@ class HomeAbon extends Component {
   async feedData () {    
     
     const token = await AsyncStorage.getItem('username');   
-    return fetch('http://abon.sumbarprov.go.id/rest_abon/api/biodata_pegawai?nip='+token, { 
+    return fetch(_baseURL_+'biodata_pegawai?nip='+token, { 
       method: 'GET',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -271,7 +273,8 @@ class HomeAbon extends Component {
               </View>
             </View>
             <View style={styles.wrapper}>
-              <TouchableOpacity onPress={() => navigate("AmbilAbsen",{ absen_type: this.state.tap_in ? 2 : 1 })}>
+              <TouchableOpacity onPress={() => navigate("AmbilAbsen",{ absen_type: this.state.tap_in ? 2 : 1 })}>           
+            
                 <LinearGradient
                   colors={['#FF9484', '#FF4955']} 
                   style={{borderRadius:10, 
@@ -285,7 +288,7 @@ class HomeAbon extends Component {
                   elevation:1}}
                   start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>                
                   <Icon name={'fingerprint'} size={61} style={{color:'#74C6F4', textAlign:'center'}} />               
-                  <View style={{flexShrink: 1, marginLeft:10}}>
+                  <View style={{flexShrink: 1, marginLeft:20}}>
                      <Text style={{fontSize:17, color:'#fff'}}>Tekan tombol disamping untuk mengambil absen {this.state.tap_in ? 'keluar' : 'masuk'}</Text>
                   </View>
                 </LinearGradient>              
@@ -293,6 +296,7 @@ class HomeAbon extends Component {
             </View>            
           </ScrollView>
         </SafeAreaView>
+      
     );
 }
 }

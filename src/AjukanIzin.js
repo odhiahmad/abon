@@ -7,8 +7,9 @@ import {
 
 import AsyncStorage from '@react-native-community/async-storage';
 import DatePicker from 'react-native-datepicker'
-import Icon from 'react-native-vector-icons/AntDesign';
 import RNPickerSelect from 'react-native-picker-select';
+
+import { _URL_ } from "../constant";
 
 class AjukanIzin extends Component {
   reset(){
@@ -80,7 +81,6 @@ class AjukanIzin extends Component {
       });
   }
    
-    
   handleSaveClick = async () => {
     if (this.state.jenisIzin == '1') {
       this.setState({
@@ -109,7 +109,7 @@ class AjukanIzin extends Component {
           }
           formBody = formBody.join('&');  
     
-          return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin',{
+          return fetch(_URL+'izin',{
             method: 'POST',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded'
@@ -164,7 +164,7 @@ class AjukanIzin extends Component {
           }
           formBody = formBody.join('&');  
     
-          return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin',{
+          return fetch(_URL_+'izin',{
             method: 'POST',
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded'
@@ -217,7 +217,7 @@ class AjukanIzin extends Component {
             }
             formBody = formBody.join('&');  
       
-            return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin',{
+            return fetch(_URL_+'izin',{
               method: 'POST',
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -270,7 +270,7 @@ class AjukanIzin extends Component {
             }
             formBody = formBody.join('&');  
       
-            return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin',{
+            return fetch(_URL_+'izin',{
               method: 'POST',
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -323,7 +323,7 @@ class AjukanIzin extends Component {
             }
             formBody = formBody.join('&');  
       
-            return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin',{
+            return fetch(_URL_+'izin',{
               method: 'POST',
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -376,7 +376,7 @@ class AjukanIzin extends Component {
             }
             formBody = formBody.join('&');  
       
-            return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin',{
+            return fetch(_URL_+'izin',{
               method: 'POST',
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -429,7 +429,7 @@ class AjukanIzin extends Component {
             }
             formBody = formBody.join('&');  
       
-            return fetch('http://abon.sumbarprov.go.id/rest_abon/api/izin',{
+            return fetch(_URL_+'izin',{
               method: 'POST',
               headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'

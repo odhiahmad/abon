@@ -4,28 +4,31 @@ import {
   Text,
   StyleSheet, TouchableOpacity
 } from "react-native";
+import { StackActions } from '@react-navigation/native';
 
 class SuccessAbsen extends Component {
   static navigationOptions = {
     header: null
   }
-  
   constructor(props){
     super(props)
     this.state={
-      tanggal: this.props.navigation.state.params.tanggal,
-      jam:this.props.navigation.state.params.jam
+      tanggal:this.props.route.params.tanggal,
+      jam:this.props.route.params.jam
     }
+    console.log(this.state.tanggal);
+    console.log(this.state.jam);
   }
 
-  reset = () => {  
-    this.props.navigation.navigate('Home');
+  reset = () => {    
+    this.props.navigation.dispatch(
+    StackActions.replace('Home'));  
   }
 
   render() {
     return (
       <View style={styles.container}>
-        <Text style={{fontWeight:'bold',fontSize:18,color:'#2D3137',textAlign:'center'}}>Terimakasih Anda telah melakukan absen</Text>
+        <Text style={{fontWeight:'bold',fontSize:16,color:'#2D3137',textAlign:'center'}}>Terima Kasih Anda Telah Mengambil Absen</Text>
         <View style={{marginTop:20, borderWidth:1, borderColor:'1095E8',borderRadius:5, padding:20}}>
           <Text style={{fontWeight:'bold',fontSize:15,color:'#2D3137',textAlign:'center'}}>Tanggal : {this.state.tanggal}</Text>
           <Text style={{fontWeight:'bold',fontSize:15,color:'#2D3137',textAlign:'center'}}>Jam : {this.state.jam}</Text>
