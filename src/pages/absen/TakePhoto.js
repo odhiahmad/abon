@@ -15,7 +15,11 @@ import * as Permissions from "expo-permissions";
 import Icon from "react-native-vector-icons/Feather";
 import { StackActions } from "@react-navigation/native";
 import { _baseURL_ } from "../../../constant";
+import { absenluar } from "./../../services/absenluar";
 import * as ImageManipulator from "expo-image-manipulator";
+import AwesomeAlert from "react-native-awesome-alerts";
+import COLORS from "../../const/colors";
+
 // import { StackActions, NavigationActions } from 'react-navigation';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 class TakePhoto extends Component {
@@ -34,6 +38,9 @@ class TakePhoto extends Component {
     valueAlert: this.props.route.params.valueAlert,
     isLoading: false,
     loadingUpload: false,
+    showAlertPesan: false,
+    pesanAbsen: "",
+    suksesAbsen: true,
   };
 
   async componentDidMount() {
@@ -71,39 +78,50 @@ class TakePhoto extends Component {
       const device_hardware = await AsyncStorage.getItem("device_hardware");
 
       console.log("mulai upload");
-      this.setState({ loading: true, uri: photo.uri });
-      // ImagePicker saves the taken photo to disk and returns a local URI to it
+      this.setState({ isLoading: true, uri: photo.uri });
+
       let localUri = resizedPhoto.uri;
       let filename = localUri.split("/").pop();
-      console.log("Nama", filename);
-      // Infer the type of the image
+
       let match = /\.(\w+)$/.exec(filename);
       let type = match ? `image/${match[1]}` : `image`;
-      console.log("Tes base 64 :" + filename);
 
       const dataForm = new FormData();
       dataForm.append("nip", username);
-      dataForm.append("id_koordinat", data.id_koordinat);
-      dataForm.append("latitude", data.lat);
-      dataForm.append("longitude", data.long);
+      dataForm.append("id_koordinat", this.state.id_koordinat);
+      dataForm.append("latitude", this.state.lat);
+      dataForm.append("longitude", this.state.long);
       dataForm.append("image_tag", filename);
-      dataForm.append("image_data", database64);
+      dataForm.append("image_data", resizedPhoto.base64);
       dataForm.append("store_device_id", device_id);
       dataForm.append("device_model", device_model);
       dataForm.append("device_device", device_device);
       dataForm.append("device_hardware", device_hardware);
       dataForm.append("metode", "0");
-      dataForm.append("jenis_presensi", data.jenis_presensi);
-      dataForm.append("jenis_opsi", data.valueAlert);
+      dataForm.append("jenis_presensi", this.state.jenis_presensi);
+      dataForm.append("jenis_opsi", this.state.valueAlert);
       dataForm.append("package_name[0]", "tes");
+
+      const ambilAbsen = await absenluar(dataForm);
+
+      if (ambilAbsen.data.status == "RC200") {
+        this.setState({
+          isLoading: false,
+          suksesAbsen: true,
+        });
+        this.props.navigation.navigate("SuccessAbsen", {
+          pesanAbsen: ambilAbsen.data.response,
+        });
+      } else {
+        this.setState({
+          isLoading: false,
+
+          suksesAbsen: false,
+        });
+        Alert.alert("Notif", ambilAbsen.data.response);
+      }
     }
   };
-
-  reset(time, date) {
-    this.props.navigation.dispatch(
-      StackActions.replace("SuccessAbsen", { jam: time, tanggal: date })
-    );
-  }
 
   render() {
     const { hasCameraPermission } = this.state;
@@ -111,7 +129,12 @@ class TakePhoto extends Component {
     if (this.state.isLoading) {
       return (
         <View
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: COLORS.white,
+          }}
         >
           <ActivityIndicator
             style={styles.indicator}
@@ -145,30 +168,6 @@ class TakePhoto extends Component {
             }}
             type={this.state.type}
           >
-            {/* <View style={{
-                            // position: 'absolute',
-                            alignSelf: 'flex-end',
-                            bottom: 40,
-                            flexDirection: 'row',
-                            flex: 1,
-                            width: '100%',
-                            padding: 20,
-                            justifyContent: 'space-between'
-                        }}>
-                            <TouchableOpacity
-                                onPress={this.ambilFoto}
-                                style={{
-                                    alignSelf: 'center',
-                                    flex: 1,
-                                    alignItems: 'center'
-                                }}
-                            >
-                                <View style={{ backgroundColor: 'green', borderRadius: 40 }}>
-                                    <Icon name="camera" size={30} style={{ color: 'white', padding: 20 }} />
-
-                                </View>
-                            </TouchableOpacity>
-                        </View> */}
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={styles.button}

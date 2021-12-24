@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialIcons";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import COLORS from "../../const/colors";
 import LoaderModal from "../../components/loader";
 import moment from "moment";
@@ -25,6 +26,7 @@ import CariComponent from "../../components/CariComponent";
 import RadioButton from "../../components/RadioButton";
 import { sort } from "./sort";
 import { AntDesign } from "@expo/vector-icons";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 const sortList = [
   {
@@ -55,8 +57,67 @@ export default function RiwayatAbsen({ navigation, route }) {
   });
   const [text, setText] = useState("");
   const [cari, setCari] = useState("Cari");
-  const [modalSort, setModalSort] = useState(false);
+  const [modal, setModal] = useState(false);
   const [sortBy, setSortBy] = useState(sortList);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [status, setStatus] = useState(0);
+
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (dateTemp) => {
+    const tanggalTemp = moment(dateTemp).format("L");
+    const tahun = dateTemp.getFullYear();
+    const bulan = tanggalTemp.substring(3, 5);
+
+    const tanggal = tahun + "-" + bulan;
+    getHistory(tanggal);
+    console.log(tanggal);
+    hideDatePicker();
+  };
+
+  const getHistory = async (tanggal) => {
+    setData({
+      ...data,
+      loading: true,
+      data: [],
+    });
+    const username = await AsyncStorage.getItem("username");
+    const dataGet = {
+      nip: username,
+      periode: tanggal,
+    };
+    const response = await riwayatabsen(dataGet);
+
+    if (response.data.status === "RC202") {
+      setData({
+        ...data,
+        loading: false,
+      });
+      setStatus(2);
+    } else {
+      const dataTemp = response.data.response;
+      console.log(dataTemp);
+      const dataGG = [];
+      for (let i = 0; i < dataTemp.length; i++) {
+        if (dataTemp[i].jadwal[0].keluar !== "") {
+          dataGG.push(dataTemp[i]);
+        }
+      }
+
+      setData({
+        ...data,
+        loading: false,
+        data: dataGG,
+      });
+      setStatus(1);
+    }
+  };
 
   const getIndex = async () => {
     setData({
@@ -64,31 +125,41 @@ export default function RiwayatAbsen({ navigation, route }) {
       loading: true,
       data: [],
     });
-
     const username = await AsyncStorage.getItem("username");
+    const tanggalSkrg = new Date();
+    const tanggalTemp = moment(tanggalSkrg).format("L");
+    const tahun = tanggalSkrg.getFullYear();
+    const bulan = tanggalTemp.substring(3, 5);
+
+    const tanggal = tahun + "-" + bulan;
     const dataGet = {
       nip: username,
-      periode: "2021-11",
+      periode: tanggal,
     };
     const response = await riwayatabsen(dataGet);
 
-    const dataTemp = response.data.response;
-    const dataGG = [];
-    for (let i = dataTemp.length - 1; i > 0; i--) {
-      if (dataTemp[i].jadwal[0].validation_masuk !== "") {
-        dataGG.push(dataTemp[i]);
-      } else {
-        break;
+    if (response.data.status === "RC202") {
+      setData({
+        ...data,
+        loading: false,
+      });
+      setStatus(2);
+    } else {
+      const dataTemp = response.data.response;
+      const dataGG = [];
+      for (let i = 0; i < dataTemp.length; i++) {
+        if (dataTemp[i].jadwal[0].masuk !== "") {
+          dataGG.push(dataTemp[i]);
+        }
       }
+
+      setStatus(1);
+      setData({
+        ...data,
+        loading: false,
+        data: dataGG,
+      });
     }
-
-    setData({
-      ...data,
-      loading: false,
-      data: dataGG,
-    });
-
-    console.log(data.data);
   };
 
   useEffect(() => {
@@ -130,26 +201,6 @@ export default function RiwayatAbsen({ navigation, route }) {
       console.log(text);
     }
   };
-  const newUserList =
-    text == ""
-      ? data.data
-      : data.data.filter((dataCari) => {
-          const newText = text.toLowerCase();
-          return (
-            `${dataCari.jadwal[0].kelompok_presensi_keluar}`
-              .toLowerCase()
-              .includes(newText) ||
-            `${dataCari.jadwal[0].nama_lokasi_keluar}`
-              .toLowerCase()
-              .includes(newText) ||
-            `${dataCari.jadwal[0].nama_lokasi_masuk}`
-              .toLowerCase()
-              .includes(newText) ||
-            `${dataCari.jadwal[0].kelompok_presensi_masuk}`
-              .toLowerCase()
-              .includes(newText)
-          );
-        });
 
   const CartCardNews = ({ item }) => {
     return (
@@ -204,11 +255,14 @@ export default function RiwayatAbsen({ navigation, route }) {
                 <View></View>
                 <Text
                   style={{
-                    fontWeight: "bold",
                     fontSize: 14,
-                    color: COLORS.black,
+                    color: COLORS.hijauTerang,
                   }}
-                ></Text>
+                >
+                  {parseInt(item.jadwal[0].validation_masuk) == 2
+                    ? "Device Tidak Sesuai"
+                    : ""}
+                </Text>
               </View>
               <View
                 style={{
@@ -294,12 +348,14 @@ export default function RiwayatAbsen({ navigation, route }) {
 
                 <Text
                   style={{
-                    fontWeight: "bold",
                     fontSize: 14,
-                    color: COLORS.black,
+                    color: COLORS.hijauTerang,
                   }}
-                ></Text>
-                {/* </View> */}
+                >
+                  {parseInt(item.jadwal[0].validation_keluar) == 2
+                    ? "Device Tidak Sesuai"
+                    : ""}
+                </Text>
               </View>
               <View
                 style={{
@@ -359,40 +415,49 @@ export default function RiwayatAbsen({ navigation, route }) {
   return (
     <SafeAreaView style={{ backgroundColor: COLORS.white, flex: 1 }}>
       <LoaderModal loading={data.loading} />
-      <CariComponent
-        placeholder={"Cari nama lokasi"}
-        sortTitle={"Urutkan"}
-        handleSort={handleSortModalVisible}
-        handleSearchInput={handleSearchInput}
-      />
-
-      <FlatList
-        data={newUserList}
-        style={{ backgroundColor: COLORS.background }}
-        renderItem={({ item }) => <CartCardNews item={item} />}
-        key={(item, index) => index.toString()}
-        keyExtractor={(item, index) => index.toString()}
-      />
-      <Modal
-        visible={modalSort}
-        onDismiss={setModalSort}
-        transparent={true}
-        onRequestClose={setModalSort}
-        onMagicTap={setModalSort}
-        animationType={"fade"}
-      >
-        <View style={style.centeredModal}>
-          <View style={style.modalContainer}>
-            <RadioButton
-              data={sortBy}
-              styles={{ paddingVertical: 16 }}
-              selectedColor="orange"
-              unselectedColor="white"
-              handleSelectedSort={handleSelectedSort}
-            />
-          </View>
+      <View style={style.header}>
+        <Text style={{ fontSize: 20, fontWeight: "bold" }}>Riwayat Absen</Text>
+        <TouchableOpacity
+          onPress={showDatePicker}
+          style={{
+            borderRadius: 10,
+            paddingVertical: 5,
+            paddingHorizontal: 10,
+            backgroundColor: COLORS.primary,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <FontAwesome5 name="history" color={COLORS.white} size={10} />
+          <Text style={{ color: COLORS.white, fontSize: 12 }}> History</Text>
+        </TouchableOpacity>
+      </View>
+      {status === 1 ? (
+        <FlatList
+          data={data.data}
+          style={{ backgroundColor: COLORS.background }}
+          renderItem={({ item }) => <CartCardNews item={item} />}
+          key={(item, index) => index.toString()}
+          keyExtractor={(item, index) => index.toString()}
+        />
+      ) : status === 2 ? (
+        <View
+          style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
+        >
+          <Text>Tidak Ada Data</Text>
         </View>
-      </Modal>
+      ) : (
+        <View
+          style={{ alignItems: "center", justifyContent: "center", flex: 1 }}
+        ></View>
+      )}
+
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+      />
     </SafeAreaView>
   );
 }
@@ -400,6 +465,7 @@ const style = StyleSheet.create({
   header: {
     paddingVertical: 20,
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     marginHorizontal: 20,
   },

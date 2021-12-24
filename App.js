@@ -6,13 +6,16 @@ import { createStackNavigator } from "@react-navigation/stack";
 
 import Home from "./src/pages/home/HomeAbon";
 import Agenda from "./src/pages/agenda/AgendaAbon";
+
 import RiwayatAbsen from "./src/pages/absen/RiwayatAbsen";
 import Profile from "./src/pages/profil/ProfileAbon";
 import AmbilAbsen from "./src/pages/absen/AmbilAbsen";
+import RiwayatAgenda from "./src/pages/agenda/RiwayatAgenda";
+
 import AjukanIzin from "./src/pages/izin/AjukanIzin";
 import RiwayatIzin from "./src/pages/izin/RiwayatIzin";
 import PdfViewer from "./src/PdfViewer";
-import SuccessAbsen from "./src/pages/absen/SuccessAbsen";
+import SuccessAbsen from "./src/pages/SuccessAbsen";
 import TakePhoto from "./src/pages/absen/TakePhoto";
 import LoginActivity from "./src/pages/login/LoginActivity";
 
@@ -62,13 +65,7 @@ const StackHome = () => (
         headerShown: false,
       }}
     />
-    <Stack.Screen
-      name="SuccessAbsen"
-      component={SuccessAbsen}
-      options={{
-        headerShown: false,
-      }}
-    />
+
     <Stack.Screen
       name="TakePhoto"
       component={TakePhoto}
@@ -99,16 +96,10 @@ const StackAgenda = () => (
       }}
     />
     <Stack.Screen
-      name="RiwayatIzin"
-      component={RiwayatIzin}
+      name="RiwayatAgenda"
+      component={RiwayatAgenda}
       options={{
-        title: "Riwayat Izin",
-        headerStyle: {
-          backgroundColor: "white",
-          elevation: 0,
-        },
         headerShown: false,
-        headerTitleStyle: { alignSelf: "center" },
       }}
     />
   </Stack.Navigator>
@@ -190,7 +181,7 @@ export default function App() {
       // After restoring token, we may need to validate it in production apps
       // This will switch to the App screen or Auth screen and this loading
       // screen will be unmounted and thrown away.
-      console.log(userToken);
+
       dispatch({ type: "RESTORE_TOKEN", token: userToken });
     };
     bootstrapAsync();
@@ -290,6 +281,13 @@ function HomeScreenStack({ navigation }) {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="SuccessAbsen"
+        component={SuccessAbsen}
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack.Navigator>
   );
 }
@@ -316,8 +314,8 @@ function BottomTabStack() {
           fontSize: 15,
         },
         tabStyle: {
-          paddingBottom: 35,
-          height: 90,
+          paddingBottom: 25,
+          height: 80,
           borderTopWidth: 0,
           // elevation: 10,
           // shadowColor: "#000",
@@ -326,7 +324,7 @@ function BottomTabStack() {
           // shadowRadius: 2,
 
           zIndex: 2,
-          marginTop: -10,
+
           dotCornerRadius: 10,
           dotSize: "small",
           whenActiveShow: "label-only",

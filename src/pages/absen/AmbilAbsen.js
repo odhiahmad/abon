@@ -18,7 +18,7 @@ import IconB from "react-native-vector-icons/MaterialIcons";
 import * as DocumentPicker from "expo-document-picker";
 import * as Device from "expo-device";
 import Axios from "../../services/index";
-import { BottomSheet, Header, Icon, ListItem } from "react-native-elements";
+import { BottomSheet, Header, ListItem } from "react-native-elements";
 import LoaderModal from "./../../LoaderModal";
 import COLORS from "../../const/colors";
 import { cekdistance } from "./../../services/cekdistance";
@@ -138,7 +138,7 @@ const AmbilAbsen = ({ navigation, route }) => {
       setModalVisible(false);
       setData({
         ...data,
-        showAlert: false,
+        isLoading: true,
       });
 
       let filename;
@@ -188,18 +188,18 @@ const AmbilAbsen = ({ navigation, route }) => {
         setData({
           ...data,
           isLoading: false,
-          showAlertPesan: true,
-          pesanAbsen: ambilAbsen.data.response,
           suksesAbsen: true,
+        });
+        navigation.navigate("SuccessAbsen", {
+          pesanAbsen: ambilAbsen.data.response,
         });
       } else {
         setData({
           ...data,
           isLoading: false,
-          showAlertPesan: true,
-          pesanAbsen: ambilAbsen.data.response,
           suksesAbsen: false,
         });
+        Alert.alert("Notif", ambilAbsen.data.response);
       }
     }
   };
@@ -242,21 +242,21 @@ const AmbilAbsen = ({ navigation, route }) => {
       setData({
         ...data,
         isLoading: false,
-        showAlertPesan: true,
-        pesanAbsen: ambilAbsen.data.response,
         suksesAbsen: true,
+      });
+
+      navigation.navigate("SuccessAbsen", {
+        pesanAbsen: ambilAbsen.data.response,
       });
     } else {
       setData({
         ...data,
         isLoading: false,
-        showAlertPesan: true,
-        pesanAbsen: ambilAbsen.data.response,
         suksesAbsen: false,
       });
-    }
 
-    console.log(ambilAbsen.data);
+      Alert.alert("Notif", ambilAbsen.data.response);
+    }
   };
 
   //Absen Keluar
@@ -458,7 +458,23 @@ const AmbilAbsen = ({ navigation, route }) => {
                       flexDirection: "row",
                       alignItems: "center",
                     }}
-                    onPress={() => showAlert()}
+                    onPress={() => {
+                      Alert.alert(
+                        "Ambil Absen",
+                        "Apakah anda yakin ingin mengambil absen?",
+                        [
+                          {
+                            text: "Kembali",
+                            onPress: () => console.log("Cancel Pressed"),
+                            style: "cancel",
+                          },
+                          {
+                            text: "Ya,Lanjutkan",
+                            onPress: () => tap_absen_in(),
+                          },
+                        ]
+                      );
+                    }}
                   >
                     <FontAwesome
                       name={"clipboard"}
@@ -595,7 +611,7 @@ const AmbilAbsen = ({ navigation, route }) => {
     <SafeAreaView style={styles.container}>
       <LoaderModal loading={data.isLoading} />
       <View style={styles.header}>
-        <Icon name="arrow-back-ios" size={28} onPress={navigation.goBack} />
+        <IconB name="arrow-back-ios" size={28} onPress={navigation.goBack} />
         <Text style={{ fontSize: 20, fontWeight: "bold" }}>Ambil Absen</Text>
       </View>
       <FlatList
@@ -620,10 +636,10 @@ const AmbilAbsen = ({ navigation, route }) => {
                 onPress={() => {
                   setModalVisible(false);
                 }}
-                style={{ flexDirection: "row" }}
+                style={{ flexDirection: "row", alignItems: "center" }}
               >
-                <Text style={{ fontSize: 25 }}>Close</Text>
-                <Icon name="close" size={28} />
+                <Text style={{ fontSize: 20 }}>Close</Text>
+                <IconB name="close" size={25} />
               </TouchableOpacity>
             </View>
             {data.opsiAbsen.map((value) => {
@@ -645,44 +661,6 @@ const AmbilAbsen = ({ navigation, route }) => {
           </View>
         </View>
       </Modal>
-      <AwesomeAlert
-        show={data.showAlertPesan}
-        showProgress={false}
-        title="Pesan"
-        message={data.pesanAbsen}
-        closeOnTouchOutside={true}
-        closeOnHardwareBackPress={false}
-        showCancelButton={true}
-        showConfirmButton={false}
-        cancelText="Kembali"
-        confirmButtonColor={COLORS.primary}
-        onCancelPressed={() => {
-          if (data.suksesAbsen === true) {
-            navigation.dispatch(StackActions.replace("Home"));
-          } else {
-            hideAlertPesan();
-          }
-        }}
-      />
-      <AwesomeAlert
-        show={data.showAlert}
-        showProgress={false}
-        title="Ambil Absen"
-        message="Apakah anda yakin ingin mengambil absen dalam kantor sekarang ini ?"
-        closeOnTouchOutside={true}
-        closeOnHardwareBackPress={false}
-        showCancelButton={true}
-        showConfirmButton={true}
-        cancelText="Tidak, Kembali"
-        confirmText="Ya, Lanjutkan"
-        confirmButtonColor={COLORS.primary}
-        onCancelPressed={() => {
-          hideAlert();
-        }}
-        onConfirmPressed={() => {
-          tap_absen_in();
-        }}
-      />
     </SafeAreaView>
   );
 };

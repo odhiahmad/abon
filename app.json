@@ -1,8 +1,9 @@
 {
   "expo": {
+    "userInterfaceStyle": "automatic",
     "name": "AbsensiOnline",
     "slug": "AbsensiOnline",
-    "version": "3.2.0",
+    "version": "3.4.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
@@ -16,7 +17,13 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    
     "ios": {
+      "infoPlist": {
+        "CFBundleAllowMixedLocalizations": true,
+        "NSCameraUsageDescription": "Kamera digunakan untuk upload foto jika absen diluar kantor",
+        "NSLocationWhenInUseUsageDescription": "Lokasi digunakan untuk mengambil posisi anda terkini untuk mencek lokasi anda berada didekat kantor atau tidak"
+      },
       "supportsTablet": true,
       "bundleIdentifier": "COM.KOMINFOSUMBAR.ABONSUMBAR"
     },

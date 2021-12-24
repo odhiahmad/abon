@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   SafeAreaView,
   FlatList,
@@ -10,17 +10,24 @@ import {
   TouchableOpacity,
   View,
   Image,
+  Clipboard,
+  ToastAndroid,
+  Platform,
   StatusBar,
 } from "react-native";
+import { Snackbar } from "react-native-paper";
 import { LinearGradient } from "expo-linear-gradient";
 import ProgressCircle from "react-native-progress-circle";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import Icon from "react-native-vector-icons/AntDesign";
 import Axios from "../../services/index";
 import { Header } from "react-native-elements";
 import { AuthContext } from "./../../utils/authContext";
 import COLORS from "./../../const/colors";
 import FontAwesome from "react-native-vector-icons/FontAwesome5";
+import { biodatadashboard } from "../../services/biodatadashboard";
+
 export const onSignOut = () => AsyncStorage.clear();
 
 const ProfileAbon = ({ navigation }) => {
@@ -39,7 +46,10 @@ const ProfileAbon = ({ navigation }) => {
     average_percent: "",
     pulang_cepat: "",
     durasi: [],
+    rekap: [],
   });
+
+  const [visible, setVisible] = useState(false);
 
   const feedData = async () => {
     const nama_asn = await AsyncStorage.getItem("nama_lengkap");
@@ -49,13 +59,23 @@ const ProfileAbon = ({ navigation }) => {
 
     const token = await AsyncStorage.getItem("username");
 
+    const biodata = await biodatadashboard(username);
+
+    const rekap = biodata.data.rekap;
+    const durasi = biodata.data.durasi;
+
+   
     setData({
       ...data,
+      username: username,
       nama_asn: nama_asn,
       jabatan: jabatan,
       nama_opd: nama_opd,
+      rekap: rekap[0],
+      durasi: durasi[0],
     });
   };
+
   useEffect(() => {
     feedData();
   }, []);
@@ -66,53 +86,107 @@ const ProfileAbon = ({ navigation }) => {
   };
 
   const { signOut } = useContext(AuthContext);
+
+  const copy = (valueText) => {
+    Clipboard.setString(valueText);
+
+    if (Platform.OS === "android") {
+      ToastAndroid.show("Copy Text", ToastAndroid.SHORT);
+    } else {
+      setVisible(true);
+    }
+  };
+
+  const Header = () => {
+    return (
+      <View style={styles.boxHeader}>
+        <Text style={{ fontWeight: "bold", fontSize: 18, marginBottom: 20 }}>
+          Informasi Profil
+        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={{ width: "30%" }}>
+            <FontAwesome
+              name={"users"}
+              size={60}
+              style={{ color: COLORS.primary, textAlign: "center" }}
+            />
+          </View>
+          <View style={{ width: "70%" }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "bold",
+                color: COLORS.black,
+                marginBottom: 5,
+              }}
+            >
+              {data.nama_asn}
+            </Text>
+            <Text
+              numberOfLines={1}
+              style={{
+                fontSize: 18,
+                fontWeight: "normal",
+                color: COLORS.black,
+                marginBottom: 5,
+              }}
+            >
+              {data.nama_opd}
+            </Text>
+            <Text
+              style={{
+                fontSize: 18,
+                marginBottom: 5,
+                color: COLORS.grey,
+              }}
+            >
+              {data.jabatan}
+            </Text>
+            <TouchableOpacity
+              onPress={() => copy(data.username)}
+              style={{ flexDirection: "row", alignItems: "center" }}
+            >
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: COLORS.black,
+                }}
+              >
+                # {data.username}{" "}
+              </Text>
+              <Ionicons name="copy" size={18} color="green" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  };
   const Footer = () => {
     return (
       <View>
-        <View style={styles.boxHeader}>
-          <Text style={{ fontWeight: "bold", fontSize: 16, marginBottom: 20 }}>
-            Informasi Profil
-          </Text>
-          <View style={{ flexDirection: "row" }}>
-            <View style={{ width: "30%" }}>
-              <FontAwesome
-                name={"users"}
-                size={60}
-                style={{ color: COLORS.primary, textAlign: "center" }}
-              />
-            </View>
-            <View style={{ width: "70%" }}>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "bold",
-                  color: COLORS.black,
-                  marginBottom: 5,
-                }}
-              >
-                {data.nama_asn}
-              </Text>
-              <Text
-                numberOfLines={1}
-                style={{
-                  fontSize: 12,
-                  fontWeight: "normal",
-                  color: COLORS.black,
-                }}
-              >
-                {data.nama_opd}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 12,
-
-                  marginBottom: 5,
-                  color: COLORS.grey,
-                }}
-              >
-                {data.jabatan}
-              </Text>
-            </View>
+        <View style={styles.boxProgress}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginBottom: 20,
+            }}
+          >
+            <Text style={{ fontWeight: "bold", fontSize: 18 }}>
+              Rata - rata Absen
+            </Text>
+          </View>
+          <View style={{ alignItems: "center", justifyContent: "center" }}>
+            <ProgressCircle
+              percent={parseInt(data.durasi.average_percent)}
+              radius={50}
+              borderWidth={8}
+              color={COLORS.primary}
+              shadowColor={COLORS.hijauTerang}
+              bgColor={COLORS.white}
+            >
+              <Text style={{ fontSize: 18 }}>{data.durasi.average}</Text>
+            </ProgressCircle>
           </View>
         </View>
         <View style={styles.boxProgress}>
@@ -123,30 +197,31 @@ const ProfileAbon = ({ navigation }) => {
               marginBottom: 20,
             }}
           >
-            <Text style={{ fontWeight: "bold" }}>Informasi Absen</Text>
+            <Text style={{ fontWeight: "bold", fontSize: 18 }}>
+              Informasi Absen
+            </Text>
             <TouchableOpacity
               onPress={() => navigation.navigate("PdfViewer")}
               style={{
-                padding: 5,
-                borderRadius: 3,
+                paddingHorizontal: 10,
+                paddingVertical: 5,
+                borderRadius: 10,
                 alignItems: "center",
                 flexDirection: "row",
                 justifyContent: "center",
                 backgroundColor: COLORS.primary,
               }}
             >
-              <Icon
+              <FontAwesome
                 name={"download"}
-                size={12}
-                style={{ color: COLORS.white, textAlign: "center", padding: 3 }}
+                size={10}
+                style={{ color: COLORS.white, marginRight: 3 }}
               />
               <Text
                 style={{
                   color: COLORS.white,
-                  fontWeight: "bold",
-                  paddingHorizontal: 3,
-                  paddingVertical: 3,
-                  fontSize: 10,
+
+                  fontSize: 12,
                 }}
               >
                 Panduan
@@ -161,9 +236,11 @@ const ProfileAbon = ({ navigation }) => {
             }}
           >
             <Text style={{ color: COLORS.grey, fontSize: 16 }}>
-              Datang Telat
+              Durasi Telat
             </Text>
-            <Text style={{ color: COLORS.black, fontSize: 16 }}>2 Kali</Text>
+            <Text style={{ color: COLORS.black, fontSize: 16 }}>
+              {data.rekap.durasi_telat}
+            </Text>
           </View>
           <View
             style={{
@@ -173,27 +250,39 @@ const ProfileAbon = ({ navigation }) => {
             }}
           >
             <Text style={{ color: COLORS.grey, fontSize: 16 }}>
-              Persentasi Absen
+              Durasi Cepat Pulang
             </Text>
-            <Text style={{ color: COLORS.black, fontSize: 16 }}>8.0</Text>
+            <Text style={{ color: COLORS.black, fontSize: 16 }}>
+              {data.rekap.durasi_cepat_pulang}
+            </Text>
           </View>
-
-          <View style={{ justifyContent: "center", alignItems: "flex-end" }}>
-            <TouchableOpacity
-              style={{
-                marginTop: 30,
-                width: "100%",
-                backgroundColor: COLORS.primary,
-                borderRadius: 10,
-                padding: 15,
-                alignItems: "center",
-              }}
-              onPress={() => signOut()}
-            >
-              <Text style={{ color: "#fff", fontWeight: "bold" }}>
-                Sign Out
-              </Text>
-            </TouchableOpacity>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginBottom: 20,
+            }}
+          >
+            <Text style={{ color: COLORS.grey, fontSize: 16 }}>
+              Total Cepat Pulang
+            </Text>
+            <Text style={{ color: COLORS.black, fontSize: 16 }}>
+              {data.rekap.total_cepat_pulang}
+            </Text>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginBottom: 20,
+            }}
+          >
+            <Text style={{ color: COLORS.grey, fontSize: 16 }}>
+              Total Telat
+            </Text>
+            <Text style={{ color: COLORS.black, fontSize: 16 }}>
+              {data.rekap.total_telat}
+            </Text>
           </View>
         </View>
       </View>
@@ -203,11 +292,34 @@ const ProfileAbon = ({ navigation }) => {
     <SafeAreaView style={{ backgroundColor: COLORS.white }}>
       <View style={styles.header}>
         <Text style={{ fontSize: 20, fontWeight: "bold" }}>Profil</Text>
+        <TouchableOpacity
+          onPress={() => signOut()}
+          style={{
+            borderRadius: 10,
+            paddingVertical: 5,
+            paddingHorizontal: 10,
+            backgroundColor: COLORS.primary,
+            flexDirection: "row",
+            alignItems: "center",
+            marginRight: 2,
+          }}
+        >
+          <FontAwesome name="sign-out-alt" color={COLORS.white} size={10} />
+          <Text style={{ color: COLORS.white, fontSize: 12 }}> Sign Out</Text>
+        </TouchableOpacity>
       </View>
       <FlatList
         style={{ backgroundColor: COLORS.background }}
         ListFooterComponent={Footer}
+        ListHeaderComponent={Header}
       />
+      <Snackbar
+        visible={visible}
+        onDismiss={() => setVisible(false)}
+        style={{ backgroundColor: COLORS.hijauTerang }}
+      >
+        <Text style={{ color: COLORS.white }}>Copied {data.username}</Text>
+      </Snackbar>
     </SafeAreaView>
   );
 };
@@ -217,6 +329,7 @@ const styles = StyleSheet.create({
   header: {
     paddingVertical: 20,
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     marginHorizontal: 20,
   },

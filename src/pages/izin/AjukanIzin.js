@@ -23,6 +23,7 @@ import {
   Input,
   ListItem,
 } from "react-native-elements";
+import { TextInput } from "react-native-paper";
 
 class AjukanIzin extends Component {
   reset() {
@@ -612,17 +613,16 @@ class AjukanIzin extends Component {
           <TouchableOpacity
             style={{
               width: "100%",
-              backgroundColor: COLORS.white,
+              backgroundColor: COLORS.hijauTerang,
               borderRadius: 10,
-              borderColor: COLORS.primary,
-              borderWidth: 2,
+
               padding: 15,
-              marginBottom: 20,
+              marginBottom: 10,
               alignItems: "center",
             }}
             onPress={this.setBottomSheetVisibility}
           >
-            <Text style={{ color: COLORS.black, fontWeight: "bold" }}>
+            <Text style={{ color: COLORS.white, fontWeight: "bold" }}>
               Pilih Jenis Izin
             </Text>
           </TouchableOpacity>
@@ -630,22 +630,42 @@ class AjukanIzin extends Component {
             <View></View>
           ) : (
             <View>
-              <Input
-                placeholder="Jenis Izin"
-                disabled={true}
+              <TextInput
+                mode="outlined"
+                label="Jenis Izin"
+                autoCapitalize="words"
+                theme={{
+                  colors: {
+                    placeholder: "black",
+                    text: "black",
+                    primary: "black",
+                    underlineColor: "transparent",
+                    background: "#fff",
+                  },
+                }}
                 value={this.state.pilihanNama}
-                autoCapitalize="none"
                 onChangeText={(text) => this.setState({ perihal: text })}
               />
             </View>
           )}
-
-          <Input
-            placeholder="Perihal"
+          <TextInput
+            style={{ marginBottom: 10 }}
+            mode="outlined"
+            label="Perihal"
+            autoCapitalize="words"
+            theme={{
+              colors: {
+                placeholder: "black",
+                text: "black",
+                primary: "black",
+                underlineColor: "transparent",
+                background: "#fff",
+              },
+            }}
             value={this.state.perihal}
-            autoCapitalize="none"
             onChangeText={(text) => this.setState({ perihal: text })}
           />
+
           {this.state.jenisIzin == "1" && ( //Hadir Terlambat
             <View style={{ marginTop: 5 }}>
               <Text style={{ fontSize: 16, marginLeft: 10 }}>Tanggal</Text>
